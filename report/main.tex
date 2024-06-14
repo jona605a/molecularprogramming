@@ -1,0 +1,59 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}% Tweak page margins
+\usepackage{graphicx} % Required for inserting images
+\usepackage{float} % Positioning of figures
+\usepackage{xcolor}
+\usepackage{tikz-cd}
+%\usepackage{tikz-cd}
+\usepackage[most]{tcolorbox}
+\usepackage[outputdir=../]{minted}
+\usepackage{biblatex}
+%\bibliography{ref}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{forest}
+
+
+\definecolor{folderbg}{RGB}{124,166,198}
+\definecolor{folderborder}{RGB}{110,144,169}
+
+\def\Size{4pt}
+\tikzset{
+  folder/.pic={
+    \filldraw[draw=folderborder,top color=folderbg!50,bottom color=folderbg]
+      (-1.05*\Size,0.2\Size+5pt) rectangle ++(.75*\Size,-0.2\Size-5pt);  
+    \filldraw[draw=folderborder,top color=folderbg!50,bottom color=folderbg]
+      (-1.15*\Size,-\Size) rectangle (1.15*\Size,\Size);
+  }
+}
+
+
+\title{Molecular programming with \textit{CRN++}, a 02257 project}
+\author{
+    Hans Henrik Hermansen s194042\\
+    Jonathan S. Højlev s194684\\
+    Rani Ey. í Bø s194067}
+\date{26/06 2024}
+
+\begin{document}
+\pagenumbering{gobble}
+
+\maketitle
+\section{Abstract}
+This report does clever things. 
+
+
+\newpage
+
+\pagenumbering{arabic}
+
+\input{report/1.crn_interpreter}
+\input{report/2.chemical_reaction}
+\input{report/3.compiling}
+\input{report/4.evaluation}
+
+\newpage
+\input{report/Appendix}
+%\printbibliography
+
+\end{document}
