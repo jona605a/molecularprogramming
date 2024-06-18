@@ -6,22 +6,69 @@ open CRNParser
 open FParsec
 
 
+let rmws (s: string) =
+    s.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "")
+
+
 [<EntryPoint>]
 let main args =
 
 
-    match run pmodule "sqrt[hej,  
-      farvel]" with
-    | Success(result, _, _)   -> printfn "Success: %A" result
+    match run pmodule (rmws "sqrt[hej,  farvel]") with
+    | Success(result, _, _) -> printfn "Success: %A" result
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
-    match run pmodule "add[a,  
-      b,   c  ]" with
-    | Success(result, _, _)   -> printfn "Success: %A" result
+    match
+        run
+            pmodule
+            (rmws
+                "add[a,  
+      b,   c  ]")
+    with
+    | Success(result, _, _) -> printfn "Success: %A" result
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
-    match run prxn "rxn[ A + B + C, B + C, 1.34]" with
-    | Success(result, _, _)   -> printfn "Success: %A" result
+    match run prxn (rmws "rxn[ A + B + C, B + C, 1.34]") with
+    | Success(result, _, _) -> printfn "Success: %A" result
+    | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
+
+
+    match run pconditionals (rmws "ifGT[{ sub[atmp,btmp,a] }]") with
+    | Success(result, _, _) -> printfn "Success: %A" result
+    | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
+
+
+
+    let teststep =
+        (rmws
+            "step[{
+ ifGT[{ sub[atmp,btmp,a] }],
+ ifLT[{ sub[btmp,atmp,b] }]}]")
+
+    match run pstep teststep with
+    | Success(result, _, _) -> printfn "Success: %A" result
+    | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
+
+
+
+    let testprog =
+        rmws
+            "crn = {
+ conc[a,3 ],
+ conc[b,6 ],
+ step[{
+ ld [a, atmp],
+ ld [b, btmp],
+ cmp[a,b]
+ }],
+ step[{
+ ifGT[{ sub[atmp,btmp,a] }],
+ ifLT[{ sub[btmp,atmp,b] }]
+ }]
+ };"
+
+    match run pprogram testprog with
+    | Success(result, _, _) -> printfn "Success: %A" result
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
 
     0
