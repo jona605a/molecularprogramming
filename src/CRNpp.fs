@@ -1,10 +1,9 @@
 module CRNpp
 
 type species = string
+    
 
-type Rxns = Rx of species List * species List * float
-
-type Module =
+type Command =
     | Ld of species * species
     | Add of species * species * species
     | Sub of species * species * species
@@ -12,12 +11,7 @@ type Module =
     | Div of species * species * species
     | Sqrt of species * species
     | Cmp of species * species
-
-type Command =
-    | Module
-    | Conditional
-    | Rxns
-and Conditional =
+    | Rx of species List * species List * float
     | IfGT of Command List
     | IfGE of Command List
     | IfEQ of Command List
