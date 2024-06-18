@@ -1,14 +1,17 @@
 module CRNpp
 
-type Rxns = Rx of string List * string List * float
+type species = string
+
+type Rxns = Rx of species List * species List * float
 
 type Module =
-    | Add of string * string * string
-    | Sub of string * string * string
-    | Mul of string * string * string
-    | Div of string * string * string
-    | Sqrt of string * string
-    | Cmp of string * string
+    | Ld of species * species
+    | Add of species * species * species
+    | Sub of species * species * species
+    | Mul of species * species * species
+    | Div of species * species * species
+    | Sqrt of species * species
+    | Cmp of species * species
 
 type Command =
     | Module
@@ -23,6 +26,6 @@ and Conditional =
 
 type Step = S of Command List
 
-type Conc = C of string * float
+type Conc = C of species * float
 
 type Root = R of Conc List * Step List
