@@ -14,19 +14,17 @@ let identifier: Parser<string, unit> =
 
 // module parsers
 
-let seperator s = ws .>> pstring s .>> ws
-
-let comma = seperator ","
+let comma = pstring ","
 
 let parugment = ws >>. identifier .>> comma
 
-let pfinalArgument = ws >>. identifier .>> (ws .>> pstring "]")
+let pfinalArgument = identifier .>> pstring "]"
 
 let p2argModule s f =
-    pstring (s + "[") >>. ws >>. pipe2 parugment pfinalArgument f
+    pstring (s + "[") >>. pipe2 parugment pfinalArgument f 
 
 let p3argModule s f =
-    pstring (s + "[") >>. ws >>. pipe3 parugment parugment pfinalArgument f
+    pstring (s + "[") >>. pipe3 parugment parugment pfinalArgument f
 
 let pld = p2argModule "ld" (fun x y -> Ld(x, y))
 
@@ -47,22 +45,49 @@ let pmodule = (pld <|> psqrt <|> pcmp <|> padd <|> psub <|> pmul <|> pdiv)
 
 // reactions
 
-let pexpr = ws >>. (sepBy1 identifier (seperator "+"))
+let pexpr = (sepBy1 identifier (pstring "+"))
 
 let prxn =
     pstring ("rxn" + "[")
-    >>. ws
     >>. pipe3 (pexpr .>> comma) (pexpr .>> comma) (ws >>. pfloat) (fun x y z -> Rx(x, y, z))
-    .>> ws
     .>> pstring "]"
 
 // conditionals
 
-let rec pstep = ws .>> (prxn <|> pmodule <|> pconditional)
+let pconditional s f = pipe2 (pstring (s + "[{")) (sepBy1 ((pmodule <|> prxn)) comma) f .>> pstring "}]"
 
-and pconditional =
-    (pstring "ifGT["
-     <|> pstring "ifGE["
-     <|> pstring "ifEQ["
-     <|> pstring "ifLT["
-     <|> pstring "ifLE[") >>. pstep .>> ws .>> pstring "]"
+let pifGT = pconditional "ifGT" (fun x y -> IfGT(y))
+
+let pifGE = pconditional "ifGE" (fun x y -> IfGE(y))
+
+let pifEQ = pconditional "ifEQ" (fun x y -> IfEQ(y))
+
+let pifLT = pconditional "ifLT" (fun x y -> IfLT(y))
+
+let pifLE = pconditional "ifLE" (fun x y -> IfLE(y))
+
+let pconditionals = pifGT <|> pifGE <|> pifEQ <|> pifLT <|> pifLE
+
+
+// steps
+
+let pcommands = sepBy1 (prxn <|> pmodule <|> pconditionals) comma
+
+let pstep = pipe2 (pstring "step[{") pcommands (fun x y -> S(y)).>> pstring "}]"
+
+// conc
+
+let pconc = pstring "onc[" >>. pipe2 identifier (comma >>. pfloat) (fun x y -> C(x,y)) .>> pstring "],"
+
+
+
+let pprogram = pstring "crn={" >>. pipe2 ((pstring "c"  >>. sepBy pconc (pstring "c")) <|> stringReturn "" []) (sepBy1 pstep comma) (fun x y -> R(x,y)) .>> ( pstring "}" <|> pstring "};") 
+
+
+
+
+
+
+
+
+
