@@ -11,6 +11,9 @@ TestResults
 graphimgs/
 .config/
 
+drawing/fsout/*
+drawing/graphs/*
+
 .fake
 .vscode
 *.DS_Store 

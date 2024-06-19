@@ -15,7 +15,7 @@ let rmws (s: string) =
 [<EntryPoint>]
 let main args =
 
-    let testprog =
+    let gcdprog =
         rmws
             "crn = {
  conc[a,32 ],
@@ -32,7 +32,7 @@ let main args =
  };"
 
 
-    let ast = match run pprogram testprog with
+    let ast = match run pprogram gcdprog with
                 | Success(result, _, _) -> result
                 | Failure(errorMsg, _, _) -> failwith "program not parsed"
 
