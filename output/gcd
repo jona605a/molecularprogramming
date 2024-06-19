@@ -1,0 +1,27 @@
+graph u {
+	graph [layout=neato]
+	node [shape=plaintext]
+	0 [label=R pos="0.0,0.0!"]
+	7 [label=S pos="9.0,-1.0!"]
+	0 -- 7
+	10 [label=IfLT pos="11.0,-2.0!"]
+	7 -- 10
+	11 [label="Sub(btmp,atmp,b)" pos="11.0,-3.0!"]
+	10 -- 11
+	8 [label=IfGT pos="7.0,-2.0!"]
+	7 -- 8
+	9 [label="Sub(atmp,btmp,a)" pos="7.0,-3.0!"]
+	8 -- 9
+	3 [label=S pos="-1.0,-1.0!"]
+	0 -- 3
+	6 [label="Cmp(a,b)" pos="3.0,-2.0!"]
+	3 -- 6
+	5 [label="Ld(b,btmp)" pos="-1.0,-2.0!"]
+	3 -- 5
+	4 [label="Ld(a,atmp)" pos="-5.0,-2.0!"]
+	3 -- 4
+	2 [label="C(b,12)" pos="-5.0,-1.0!"]
+	0 -- 2
+	1 [label="C(a,32)" pos="-9.0,-1.0!"]
+	0 -- 1
+}

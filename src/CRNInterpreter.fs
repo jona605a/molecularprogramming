@@ -1,6 +1,7 @@
 module CRNInterpreter
 
 open CRNpp
+open Treecode
 
 type State = Map<species,float>
 // type TypecheckState = Map<species, species> * (bool * bool * bool * bool * bool) * Set<species> // Adj list, bool for each if case, Written-to species
@@ -138,5 +139,28 @@ let interpretProgram (R(concl,stepl)) =
                     Some(nextState,(nextState,i+1))) (initialState,0)
 
 
+let rec commandToTree cmd = match cmd with
+                            | Ld(x,y) -> Node("Ld(" + x + "," + y + ")",[])
+                            | Add(x,y,z) -> Node("Add(" + x + "," + y + "," + z + ")",[])
+                            | Sub(x,y,z) -> Node("Sub(" + x + "," + y + "," + z + ")",[])
+                            | Mul(x,y,z) -> Node("Mul(" + x + "," + y + "," + z + ")",[])
+                            | Div(x,y,z) -> Node("Div(" + x + "," + y + "," + z + ")",[])
+                            | Sqrt(x,y) -> Node("Sqrt(" + x + "," + y + ")",[])
+                            | Cmp(x,y) -> Node("Cmp(" + x + "," + y + ")",[])
+                            | Rx(p,r,c) -> Node("Rx(" + List.fold (fun s x -> s + "+" + x) "" p + "," + List.fold (fun s x -> s + "+" + x) "" r + "," + (string c) + ")" ,[])
+                            | IfGT(cl) -> Node("IfGT",List.map commandToTree cl)
+                            | IfGE(cl) -> Node("IfGE",List.map commandToTree cl)
+                            | IfEQ(cl) -> Node("IfEQ",List.map commandToTree cl)
+                            | IfLT(cl) -> Node("IfLT",List.map commandToTree cl)
+                            | IfLE(cl) -> Node("IfLE",List.map commandToTree cl)
 
 
+let concToTree (C(s,c)) = Node("C(" + s + "," + (string c) + ")",[])
+
+let stepToTree (S(cl)) = Node("S",List.map commandToTree cl)
+
+
+
+
+
+let astToTree (R(concl,stepl)) = Node("R",List.map concToTree concl @ List.map stepToTree stepl)
