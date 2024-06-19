@@ -48,20 +48,25 @@ let isAsyclic (adj: Map<species, List<species>>) =
         List.fold (fun M s -> addOneToMap M s) Map.empty (List.concat adj.Values)
 
     let rec isDAG q inDegs =
+        // printfn "%A\n%A" q inDegs
+
         match q with
         | [] -> Map.isEmpty inDegs
         | e :: es ->
-            let (D, Q) =
-                List.fold
-                    (fun (M, q') y ->
-                        let x = (Map.find y M)
-                        let M' = if x <= 1 then Map.remove y M else subOneOfMap M y
-                        let Q = if x <= 1 then y :: q' else q'
-                        (M', Q))
-                    (inDegs, es)
-                    (Map.find e adj)
+            match Map.tryFind e adj with
+            | None -> isDAG es inDegs
+            | Some(neigh) ->
+                let (D, Q) =
+                    List.fold
+                        (fun (M, q') y ->
+                            let x = (Map.find y M)
+                            let M' = if x <= 1 then Map.remove y M else subOneOfMap M y
+                            let Q = if x <= 1 then y :: q' else q'
+                            (M', Q))
+                        (inDegs, es)
+                        neigh
 
-            isDAG Q D
+                isDAG Q D
 
     isDAG noOnePointsTo inDegrees
 

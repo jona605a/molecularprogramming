@@ -64,13 +64,17 @@ let doStep (S(cl): Step) (state: State) : State = doCommandList cl state
 
 
 let interpretProgram (R(concl, stepl)) =
-    let initialState = getInitialState concl
 
-    Seq.unfold
-        (fun (state, i) ->
-            let nextState = doStep (List.item (i % List.length stepl) stepl) state
-            Some(nextState, (nextState, i + 1)))
-        (initialState, 0)
+    if not (isTyped (R(concl, stepl))) then
+        failwith "Does not typecheck"
+    else
+        let initialState = getInitialState concl
+
+        Seq.unfold
+            (fun (state, i) ->
+                let nextState = doStep (List.item (i % List.length stepl) stepl) state
+                Some(nextState, (nextState, i + 1)))
+            (initialState, 0)   
 
 
 let rec commandToTree cmd =
