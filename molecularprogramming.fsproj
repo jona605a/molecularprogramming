@@ -9,6 +9,7 @@
     <Compile Include="src/CRNpp.fs" />
     <Compile Include="src/CRNParser.fs" />
     <Compile Include="src/CRNTypecheck.fs" />
+    <Compile Include="src/Treecode.fs" />
     <Compile Include="src/CRNInterpreter.fs" />
     <Compile Include="src/Program.fs" />
   </ItemGroup>
