@@ -2,7 +2,7 @@ module CRNInterpreter
 
 open CRNpp
 
-type State = (species * float) List
+type State = Map<species,float>
 // type TypecheckState = Map<species, species> * (bool * bool * bool * bool * bool) * Set<species> // Adj list, bool for each if case, Written-to species
 let mapAppend map key value =
     Map.change
@@ -99,7 +99,44 @@ let isTyped (R(concs, steps): Root) : bool =
 
 
 
-let getInitialState (r: Root) : State = []
+let getInitialState (concl : Conc List) : State = List.fold (fun state (C(s,c)) -> Map.add s c state) Map.empty concl
+
+let getValue (s : species) (state : State) = if Map.containsKey s state then Map.find s state else 0
+
+let eqCheck x y = abs (x-y) <= 0.5
+
+let rec doCommandList (cl : Command List) (state : State) = 
+    let getState s = getValue s state
+    match cl with
+    | [] -> state
+    | Ld(x,y)::clt -> doCommandList clt (Map.add y (getState x) state) 
+    | Add(x,y,z)::clt -> doCommandList clt (Map.add z ((getState x) + (getState y)) state)
+    | Sub(x,y,z)::clt -> doCommandList clt (Map.add z ((getState x) - (getState y)) state)
+    | Mul(x,y,z)::clt -> doCommandList clt (Map.add z ((getState x) * (getState y)) state)
+    | Div(x,y,z)::clt -> doCommandList clt (Map.add z ((getState x) / (getState y)) state)
+    | Sqrt(x,y)::clt -> doCommandList clt (Map.add y (sqrt (getState x)) state)
+    | Cmp(x,y)::clt ->  let xysum = (getState x) + (getState y)
+                        let Xgt,Xlt = (getState x) / xysum, (getState y) / xysum
+                        let XltState = Map.add "Xlt" Xlt state
+                        let XgtState = Map.add "Xgt" Xgt XltState
+                        doCommandList clt XgtState
+    | Rx(p,r,c)::clt -> failwith "Cannot interpret custom reactions!"
+    | IfGT(cmdl)::clt -> if getState "Xgt" > getState "Xlt" then doCommandList clt (doCommandList cmdl state) else doCommandList clt state
+    | IfGE(cmdl)::clt -> if getState "Xgt" > getState "Xlt" || eqCheck (getState "Xgt") (getState "Xlt") then doCommandList clt (doCommandList cmdl state) else doCommandList clt state                    
+    | IfEQ(cmdl)::clt -> if eqCheck (getState "Xgt") (getState "Xlt") then doCommandList clt (doCommandList cmdl state) else doCommandList clt state                    
+    | IfLT(cmdl)::clt -> if getState "Xgt" < getState "Xlt" then doCommandList clt (doCommandList cmdl state) else doCommandList clt state
+    | IfLE(cmdl)::clt -> if getState "Xgt" < getState "Xlt" || eqCheck (getState "Xgt") (getState "Xlt") then doCommandList clt (doCommandList cmdl state) else doCommandList clt state                    
 
 
-let doStep (step: Step) (state: State) : State = []
+let doStep (S(cl): Step) (state: State) : State = doCommandList cl state
+
+
+let interpretProgram (R(concl,stepl)) =
+    let initialState = getInitialState concl
+    Seq.unfold (fun (state, i) -> 
+                    let nextState = doStep (List.item (i % List.length stepl) stepl) state
+                    Some(nextState,(nextState,i+1))) (initialState,0)
+
+
+
+

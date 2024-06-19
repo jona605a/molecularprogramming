@@ -3,6 +3,7 @@
 module Main
 
 open CRNParser
+open CRNInterpreter
 open FParsec
 
 
@@ -54,8 +55,8 @@ let main args =
     let testprog =
         rmws
             "crn = {
- conc[a,3 ],
- conc[b,6 ],
+ conc[a,32 ],
+ conc[b,12 ],
  step[{
  ld [a, atmp],
  ld [b, btmp],
@@ -70,5 +71,13 @@ let main args =
     match run pprogram testprog with
     | Success(result, _, _) -> printfn "Success: %A" result
     | Failure(errorMsg, _, _) -> printfn "Failure: %s" errorMsg
+
+    let ast = match run pprogram testprog with
+                | Success(result, _, _) -> result
+                | Failure(errorMsg, _, _) -> failwith "program not parsed"
+
+    let interpretedAst = interpretProgram ast
+
+    printfn "%A" (Seq.item 5 interpretedAst)
 
     0
