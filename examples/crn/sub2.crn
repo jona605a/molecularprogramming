@@ -1,5 +1,5 @@
 crn={
-    conc[a,60],conc[b,40],
+    conc[a,20],conc[b,13],
     conc[one,1],conc[zero,0],
     step[{
         cmp[b,zero]
@@ -7,7 +7,7 @@ crn={
     step[{
         ifGE[{
             sub[a,one,anext],
-            sub[b,one,bnext],
+            sub[b,one,bnext]
         }]
     }],
     step[{
