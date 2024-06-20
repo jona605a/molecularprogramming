@@ -77,6 +77,7 @@ let interpretProgram (R(concl, stepl)) =
             (initialState, 0)   
 
 
+// Code for converting a CRN program AST to a tree with nodes corresponding to the AST, for plotting. 
 let rec commandToTree cmd =
     match cmd with
     | Ld(x, y) -> Node("Ld(" + x + "," + y + ")", [])
