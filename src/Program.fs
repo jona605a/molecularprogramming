@@ -17,14 +17,16 @@ let rmwsreaction (s : string) =
     s.Replace(" ", "").Replace("\t", "").Replace("\r", "")
 
 
-let printStateRange (ss: State seq) i j =
+let printStateRange (ss: State seq) i j printSpecies=
     // Seq.skip i ss |> Seq.take j |> Seq.toList |> printfn "%A"
+    let printSpecies s = printSpecies = [] || List.contains s printSpecies
     let l = Seq.skip i ss |> Seq.take j |> Seq.toList
     let rec printStateAsList = function
         | [] -> printfn "NEXTSTEP"
-        | (spec, conc) :: xs -> 
+        | (spec, conc) :: xs when printSpecies spec-> 
             printfn "%s %A" spec conc
             printStateAsList xs
+        | (spec,conc) :: xs -> printStateAsList xs
     let rec printrec = function
         | [] -> ()
         | st :: sts -> 
@@ -91,7 +93,7 @@ let main args =
     let initState = (Map.ofList [("A",6.0);("B",2.0)])
     let simulation = simulateReactions initState reactions 0.01
 
-    printStateRange simulation 0 10
+    printStateRange simulation 0 1000 ["A";"B";"C"]
 
     
 

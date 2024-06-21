@@ -33,7 +33,6 @@ let simulationStep (state: State) (crn: CRN) (timestep: float) =
                 []
                 crn
         )
-    printfn "%A" occurringSpecies
     Map.add "Ø" 0.0 (Set.fold
         (fun st s -> Map.add s ((getValue state s) + (calcSpeciesChange state crn s) * timestep) st)
         state
