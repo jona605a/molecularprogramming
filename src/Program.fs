@@ -4,6 +4,7 @@ module Main
 
 open CRNParser
 open CRNInterpreter
+open CRNCompiler
 open Reactions
 open ReactionsParser
 open Treecode
@@ -49,7 +50,7 @@ let main args =
 
     if args.Length > 0 then
         let inputProgram = readFile args[0] |> rmws
-        printfn "%s" inputProgram
+        //printfn "%s" inputProgram
 
         let ast =
             match run pprogram inputProgram with
@@ -57,28 +58,18 @@ let main args =
             | Failure(errorMsg, _, _) -> failwith "program not parsed"
 
         let states = interpretProgram ast
-        printStateRange states 0 100 []
+        //printStateRange states 0 100 []
 
 
 
-    let reactions =
-        [ Rxn(Map.ofList [ ("A", 1); ("B", 1) ], Map.ofList [ ("A", 1); ("B", 1); ("C", 1) ], 1.0)
-          Rxn(Map.ofList [ ("C", 1) ], Map.ofList [ ("Ø", 1) ], 1.0) ]
 
-    let initState = (Map.ofList [ ("A", 6.0); ("B", 2.0) ])
-    let simulation = simulateReactions initState reactions 0.01
+        let initState, reactions = compileCRN ast
 
-    printStateRange simulation 0 1000 [ "A"; "B"; "C" ]
+        let simulation = simulateReactions initState reactions 0.01
 
+        printStateRange simulation 0 10000 []
+    //printf "%A" reactions
 
-    let reac = rmws "A->A+C/C->Ø"
-
-    let parsedReac =
-        match run preactions reac with
-        | Success(res, _, _) -> res
-        | Failure(errorMsg, _, _) -> failwith "reactions not parsed"
-
-    printfn "%A" parsedReac
 
 
     0
