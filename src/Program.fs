@@ -26,11 +26,8 @@ let printStateRange (ss: State seq) i j printSpecies=
         function
         | [] -> printfn "NEXTSTEP"
         | (spec, conc) :: xs when printSpecies spec-> 
-        | (spec, conc) :: xs ->
             printfn "%s %A" spec conc
             printStateAsList xs
-        | (spec,conc) :: xs -> printStateAsList xs
-    let rec printrec = function
 
     let rec printrec =
         function
