@@ -21,6 +21,6 @@ let preactants = (sepBy1 identifier (pstring "+")) .>> pstring "->"
 
 let pproducts = (sepBy1 identifier (pstring "+")) 
 
-let preaction = pipe3 preactants pproducts (stringReturn "\n" 1.0 <|> (pstring "," >>. pfloat)) (fun x y z -> Rxn(speciesListToMap x,speciesListToMap y,z))
+let preaction = pipe3 preactants pproducts ((pstring "," >>. pfloat) <|> stringReturn "" 1.0 ) (fun x y z -> Rxn(speciesListToMap x,speciesListToMap y,z))
 
-let preactions = sepBy preaction (pstring "\n")
+let preactions = sepBy preaction (pstring "/")

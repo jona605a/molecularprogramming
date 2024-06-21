@@ -13,8 +13,6 @@ open FParsec
 let rmws (s: string) =
     s.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "")
 
-let rmwsreaction (s : string) =
-    s.Replace(" ", "").Replace("\t", "").Replace("\r", "")
 
 
 let printStateRange (ss: State seq) i j printSpecies=
@@ -67,5 +65,12 @@ let main args =
     printStateRange simulation 0 1000 ["A";"B";"C"]
 
 
+    let reac = rmws "A->A+C/C->Ø"
+    let parsedReac = match run preactions reac with
+                        | Success(res, _, _) -> res
+                        | Failure(errorMsg, _, _) -> failwith "reactions not parsed"
+
+    printfn "%A" parsedReac
+ 
 
     0
