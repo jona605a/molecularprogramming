@@ -25,7 +25,6 @@ def read_tree_from_file(file_path,unit_scale=1.0):
     return tree
             
 
-
 def create_tree_from_string(tree,name):
     scale = 1
     for vertex in tree:
@@ -43,7 +42,6 @@ def create_tree_from_string(tree,name):
         G.node(str(vertex[2]),label=vertex[0],pos=str(x * scale) + "," + str(-y)+ "!")
         G.edge(str(vertex[3]),str(vertex[2]))
     G.render(name)
-
 
 
 try:

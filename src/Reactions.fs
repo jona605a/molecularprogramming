@@ -16,7 +16,7 @@ let calcNetChange (Rxn(r, p, c)) (s: species) = (getValue p s) - (getValue r s)
 let calcReactionEffect (state: State) (Rxn(r, p, c)) (s: species) =
     c
     * (calcNetChange ((Rxn(r, p, c))) s)
-    * (Map.fold (fun st reac mult -> st *  (getValue state reac) ** mult) 1.0 r)
+    * (Map.fold (fun st reac mult -> st * (getValue state reac) ** mult) 1.0 r)
 
 
 let calcSpeciesChange (state: State) (crn: CRN) (s: species) =
@@ -29,16 +29,24 @@ let simulationStep (state: State) (crn: CRN) (timestep: float) =
             List.fold
                 (fun sp (Rxn(r, p, c)) ->
                     Map.fold (fun keys k _ -> k :: keys) [] r
-                    @ Map.fold (fun keys k _ -> k :: keys) [] p @ sp )
+                    @ Map.fold (fun keys k _ -> k :: keys) [] p
+                    @ sp)
                 []
                 crn
         )
-    Map.add "Ø" 0.0 (Set.fold
-        (fun st s -> Map.add s ((getValue state s) + (calcSpeciesChange state crn s) * timestep) st)
-        state
-        occurringSpecies)
+
+    Map.add
+        "Ø"
+        0.0
+        (Set.fold
+            (fun st s -> Map.add s ((getValue state s) + (calcSpeciesChange state crn s) * timestep) st)
+            state
+            occurringSpecies)
 
 
-let simulateReactions (state: State) (crn : CRN) (timestep : float) = 
-    Seq.unfold (fun (st,network,time) ->    let nextstate = simulationStep st network time
-                                            Some((nextstate,(nextstate,network,time)))) (state, crn, timestep)
+let simulateReactions (state: State) (crn: CRN) (timestep: float) =
+    Seq.unfold
+        (fun (st, network, time) ->
+            let nextstate = simulationStep st network time
+            Some((nextstate, (nextstate, network, time))))
+        (state, crn, timestep)

@@ -15,18 +15,21 @@ let rmws (s: string) =
 
 
 
-let printStateRange (ss: State seq) i j printSpecies=
+let printStateRange (ss: State seq) i j printSpecies =
     // Seq.skip i ss |> Seq.take j |> Seq.toList |> printfn "%A"
-    let printSpecies s = printSpecies = [] || List.contains s printSpecies
+    let printSpecies s =
+        printSpecies = [] || List.contains s printSpecies
+
     let l = Seq.skip i ss |> Seq.take j |> Seq.toList
 
     let rec printStateAsList =
         function
         | [] -> printfn "NEXTSTEP"
-        | (spec, conc) :: xs when printSpecies spec-> 
+        | (spec, conc) :: xs when printSpecies spec ->
             printfn "%s %A" spec conc
             printStateAsList xs
         | (spec, conc) :: xs -> printStateAsList xs
+
     let rec printrec =
         function
         | [] -> ()
@@ -57,20 +60,25 @@ let main args =
         printStateRange states 0 100 []
 
 
- 
-    let reactions = [Rxn(Map.ofList [("A",1);("B",1)],Map.ofList [("A",1);("B",1);("C",1)],1.0 );Rxn(Map.ofList [("C",1)],Map.ofList [("Ø",1)],1.0)]
-    let initState = (Map.ofList [("A",6.0);("B",2.0)])
+
+    let reactions =
+        [ Rxn(Map.ofList [ ("A", 1); ("B", 1) ], Map.ofList [ ("A", 1); ("B", 1); ("C", 1) ], 1.0)
+          Rxn(Map.ofList [ ("C", 1) ], Map.ofList [ ("Ø", 1) ], 1.0) ]
+
+    let initState = (Map.ofList [ ("A", 6.0); ("B", 2.0) ])
     let simulation = simulateReactions initState reactions 0.01
 
-    printStateRange simulation 0 1000 ["A";"B";"C"]
+    printStateRange simulation 0 1000 [ "A"; "B"; "C" ]
 
 
     let reac = rmws "A->A+C/C->Ø"
-    let parsedReac = match run preactions reac with
-                        | Success(res, _, _) -> res
-                        | Failure(errorMsg, _, _) -> failwith "reactions not parsed"
+
+    let parsedReac =
+        match run preactions reac with
+        | Success(res, _, _) -> res
+        | Failure(errorMsg, _, _) -> failwith "reactions not parsed"
 
     printfn "%A" parsedReac
- 
+
 
     0

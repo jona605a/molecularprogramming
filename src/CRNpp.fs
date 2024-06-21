@@ -1,7 +1,6 @@
 module CRNpp
 
 type species = string
-    
 
 type Command =
     | Ld of species * species

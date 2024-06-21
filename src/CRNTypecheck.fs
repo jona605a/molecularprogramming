@@ -133,7 +133,7 @@ let isTyped (R(concs, steps): Root) : bool =
             let productsAreNew = Set.intersect prod writtenTo |> Set.isEmpty
             let writtenTo' = Set.union writtenTo prod
             num >= 0 && productsAreNew && stepCheck cs adj' (b1, b2, b3, b4, b5) writtenTo'
-        | IfGT(com) :: cs when com<>[] ->
+        | IfGT(com) :: cs when com <> [] ->
             if List.forall (fun c -> isIf c) cs then
                 not b1
                 && not b2
@@ -141,7 +141,7 @@ let isTyped (R(concs, steps): Root) : bool =
                 && stepCheck cs adj (true, b2, b3, b4, b5) writtenTo
             else
                 stepCheck (cs @ [ IfGT(com) ]) adj (b1, b2, b3, b4, b5) (writtenTo)
-        | IfGE(com) :: cs when com<>[] ->
+        | IfGE(com) :: cs when com <> [] ->
             if List.forall (fun c -> isIf c) cs then
                 not b1
                 && not b2
@@ -151,7 +151,7 @@ let isTyped (R(concs, steps): Root) : bool =
                 && stepCheck cs adj (b1, true, b3, b4, b5) writtenTo
             else
                 stepCheck (cs @ [ IfGE(com) ]) adj (b1, b2, b3, b4, b5) (writtenTo)
-        | IfEQ(com) :: cs when com<>[] ->
+        | IfEQ(com) :: cs when com <> [] ->
             if List.forall (fun c -> isIf c) cs then
                 not b2
                 && not b3
@@ -160,7 +160,7 @@ let isTyped (R(concs, steps): Root) : bool =
                 && stepCheck cs adj (b1, b2, true, b4, b5) writtenTo
             else
                 stepCheck (cs @ [ IfEQ(com) ]) adj (b1, b2, b3, b4, b5) (writtenTo)
-        | IfLT(com) :: cs when com<>[] ->
+        | IfLT(com) :: cs when com <> [] ->
             if List.forall (fun c -> isIf c) cs then
                 not b4
                 && not b5
@@ -168,7 +168,7 @@ let isTyped (R(concs, steps): Root) : bool =
                 && stepCheck cs adj (b1, b2, b3, true, b5) writtenTo
             else
                 stepCheck (cs @ [ IfLT(com) ]) adj (b1, b2, b3, b4, b5) (writtenTo)
-        | IfLE(com) :: cs when com<>[] ->
+        | IfLE(com) :: cs when com <> [] ->
             if List.forall (fun c -> isIf c) cs then
                 not b2
                 && not b3
@@ -183,10 +183,13 @@ let isTyped (R(concs, steps): Root) : bool =
 
 
 
-    let stepsPass = 
-        steps <> [] && 
-        List.fold
-            (fun b (S(cmds)) -> b && not (cmds = []) && stepCheck cmds (Map.empty) (false, false, false, false, false) Set.empty)
+    let stepsPass =
+        steps <> []
+        && List.fold
+            (fun b (S(cmds)) ->
+                b
+                && not (cmds = [])
+                && stepCheck cmds (Map.empty) (false, false, false, false, false) Set.empty)
             true
             steps
 

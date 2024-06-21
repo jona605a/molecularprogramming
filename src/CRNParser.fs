@@ -21,7 +21,7 @@ let parugment = ws >>. identifier .>> comma
 let pfinalArgument = identifier .>> pstring "]"
 
 let p2argModule s f =
-    pstring (s + "[") >>. pipe2 parugment pfinalArgument f 
+    pstring (s + "[") >>. pipe2 parugment pfinalArgument f
 
 let p3argModule s f =
     pstring (s + "[") >>. pipe3 parugment parugment pfinalArgument f
@@ -54,7 +54,9 @@ let prxn =
 
 // conditionals
 
-let pconditional s f = pipe2 (pstring (s + "[{")) (sepBy1 ((pmodule <|> prxn)) comma) f .>> pstring "}]"
+let pconditional s f =
+    pipe2 (pstring (s + "[{")) (sepBy1 ((pmodule <|> prxn)) comma) f
+    .>> pstring "}]"
 
 let pifGT = pconditional "ifGT" (fun x y -> IfGT(y))
 
@@ -73,21 +75,18 @@ let pconditionals = pifGT <|> pifGE <|> pifEQ <|> pifLT <|> pifLE
 
 let pcommands = sepBy1 (prxn <|> pmodule <|> pconditionals) comma
 
-let pstep = pipe2 (pstring "step[{") pcommands (fun x y -> S(y)).>> pstring "}]"
+let pstep = pipe2 (pstring "step[{") pcommands (fun x y -> S(y)) .>> pstring "}]"
 
 // conc
 
-let pconc = pstring "onc[" >>. pipe2 identifier (comma >>. pfloat) (fun x y -> C(x,y)) .>> pstring "],"
+let pconc =
+    pstring "onc[" >>. pipe2 identifier (comma >>. pfloat) (fun x y -> C(x, y))
+    .>> pstring "],"
 
 
 
-let pprogram = pstring "crn={" >>. pipe2 ((pstring "c"  >>. sepBy pconc (pstring "c")) <|> stringReturn "" []) (sepBy1 pstep comma) (fun x y -> R(x,y)) .>> ( pstring "}" <|> pstring "};") 
-
-
-
-
-
-
-
-
-
+let pprogram =
+    pstring "crn={"
+    >>. pipe2 ((pstring "c" >>. sepBy pconc (pstring "c")) <|> stringReturn "" []) (sepBy1 pstep comma) (fun x y ->
+        R(x, y))
+    .>> (pstring "}" <|> pstring "};")

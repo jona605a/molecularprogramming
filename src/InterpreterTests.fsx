@@ -20,9 +20,15 @@ let rec shuffleSteps (R(conc, steps)) =
     R(conc, List.map (fun (S(c: List<Command>)) -> S(shuffleList c)) steps)
 
 
-let stepOrderDoesNotMatter (ast: CRNpp.Root) (startIdx: int) (endIdx: int)=
+let stepOrderDoesNotMatter (ast: CRNpp.Root) (startIdx: int) (endIdx: int) =
     let shufSteps = shuffleSteps ast
-    (isTyped ast = isTyped shufSteps) && (not (isTyped ast) || (isTyped ast && (interpretProgram ast |> Seq.skip startIdx |> Seq.take endIdx = (interpretProgram shufSteps |> Seq.skip startIdx |> Seq.take endIdx))))
+
+    (isTyped ast = isTyped shufSteps)
+    && (not (isTyped ast)
+        || (isTyped ast
+            && (interpretProgram ast |> Seq.skip startIdx |> Seq.take endIdx = (interpretProgram shufSteps
+                                                                                |> Seq.skip startIdx
+                                                                                |> Seq.take endIdx))))
 
 
 // FSCheck tests ////////////////////////
