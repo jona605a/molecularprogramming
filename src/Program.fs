@@ -21,71 +21,45 @@ let printStateRange (ss: State seq) i j printSpecies=
     // Seq.skip i ss |> Seq.take j |> Seq.toList |> printfn "%A"
     let printSpecies s = printSpecies = [] || List.contains s printSpecies
     let l = Seq.skip i ss |> Seq.take j |> Seq.toList
-    let rec printStateAsList = function
+
+    let rec printStateAsList =
+        function
         | [] -> printfn "NEXTSTEP"
         | (spec, conc) :: xs when printSpecies spec-> 
+        | (spec, conc) :: xs ->
             printfn "%s %A" spec conc
             printStateAsList xs
         | (spec,conc) :: xs -> printStateAsList xs
     let rec printrec = function
+
+    let rec printrec =
+        function
         | [] -> ()
-        | st :: sts -> 
+        | st :: sts ->
             printStateAsList (Map.toList st)
             printrec sts
+
     printrec l
 
-
-
-let printAst ast =
-    design (astToTree ast) |> printfn "%A"
+let printAst ast = design (astToTree ast) |> printfn "%A"
 
 
 [<EntryPoint>]
 let main args =
 
-    let gcdprog =
-        rmws
-            "crn = {
- conc[a,32 ],
- conc[b,12 ],
- step[{
- ld [a, atmp],
- ld [b, btmp],
- cmp[a,b]
- }],
- step[{
- ifGT[{ sub[atmp,btmp,a] }],
- ifLT[{ sub[btmp,atmp,b] }]
- }]
- };"
+    let readFile filePath = System.IO.File.ReadAllText(filePath)
 
-    let test =
-        rmws
-            "crn = {
- conc[a,32 ],
- conc[b,12 ],
- step[{
- ld [a, atmp],
- ld [b, btmp],
- cmp[a,b]
- }],
- step[{
- ifGT[{ sub[atmp,btmp,a] }],
- ifLT[{ sub[btmp,atmp,b] }]
- }]
- };"
+    if args.Length > 0 then
+        let inputProgram = readFile args[0] |> rmws
+        printfn "%s" inputProgram
 
-    let ast = match run pprogram gcdprog with
-                | Success(result, _, _) -> result
-                | Failure(errorMsg, _, _) -> failwith "program not parsed"
+        let ast =
+            match run pprogram inputProgram with
+            | Success(res, _, _) -> res
+            | Failure(errorMsg, _, _) -> failwith "program not parsed"
 
-    let interpretedAst = interpretProgram ast
-
-    // printfn "%A" (Seq.item 10 interpretedAst)
-    // printfn "%A" (interpretedAst |> Seq.take 10 |> Seq.toList)
-    //printStateRange interpretedAst 0 10
-    
-    // printAst ast
+        let states = interpretProgram ast
+        printStateRange states 0 100 []
 
 
  
@@ -95,6 +69,6 @@ let main args =
 
     printStateRange simulation 0 1000 ["A";"B";"C"]
 
-    
+
 
     0

@@ -1,12 +1,12 @@
 crn = {
-    conc[c,c0], conc[cInitial, 3],
+    conc[c,3], conc[cInitial, 3],
     conc[one,1], conc[zero,0],
     step[{
         sub[c,one,cnext],
         cmp[c,zero]
     }],
     step[{
-        ifGR[{ ld[cnext,c] }],
+        ifGT[{ ld[cnext,c] }],
         ifLE[{ ld[cInitial, c] }]
     }]
 }
