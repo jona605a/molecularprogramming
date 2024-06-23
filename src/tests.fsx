@@ -328,10 +328,12 @@ let stepOrderDoesNotMatter (programIdx: int) =
 
 
 let addWorks (NormalFloat(a)) (NormalFloat(b)) =
+    let concA = sprintf "%.1f" (abs a)
+    let concB = sprintf "%.1f" (abs b)
     let inputProgram = 
         $"crn = {{
-            conc[a,{abs(a)}], conc[b,{abs(b)}],
-            step[{{ add[a,b,c]}}]
+            conc[a,{concA}], conc[b,{concB}],
+            step[{{ add[a,b,c] }}]
         }}" |> rmws
     
     printfn "%A" inputProgram
@@ -339,16 +341,18 @@ let addWorks (NormalFloat(a)) (NormalFloat(b)) =
     let ast = 
         match run pprogram inputProgram with 
             | Success((res: CRNpp.Root), _, _) -> res
-            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
+            | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
     let initState, CRN = compileCRN ast
     abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)) < 0.01 &&
     abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)) < 0.01
 
 
 let subWorks (NormalFloat(a)) (NormalFloat(b)) =
+    let concA = sprintf "%.1f" (abs a)
+    let concB = sprintf "%.1f" (abs b)
     let inputProgram = 
         $"crn = {{
-            conc[a,{abs(a)}], conc[b,{abs(b)}],
+            conc[a,{concA}], conc[b,{concB}],
             step[{{ sub[a,b,c]}}]
         }}" |> rmws
     let ast = 
@@ -360,9 +364,11 @@ let subWorks (NormalFloat(a)) (NormalFloat(b)) =
 
 
 let divWorks (NormalFloat(a)) (NormalFloat(b)) =
+    let concA = sprintf "%.1f" (abs a)
+    let concB = sprintf "%.1f" (abs b)
     let inputProgram = 
         $"crn = {{
-            conc[a,{abs(a)}], conc[b,{abs(b)}],
+            conc[a,{concA}], conc[b,{concB}],
             step[{{ div[a,b,c]}}]
         }}" |> rmws
     let ast = 
@@ -373,9 +379,11 @@ let divWorks (NormalFloat(a)) (NormalFloat(b)) =
     abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a / b)) < 0.01
 
 let mulWorks (NormalFloat(a)) (NormalFloat(b)) =
+    let concA = sprintf "%.1f" (abs a)
+    let concB = sprintf "%.1f" (abs b)
     let inputProgram = 
         $"crn = {{
-            conc[a,{abs(a)}], conc[b,{abs(b)}],
+            conc[a,{concA}], conc[b,{concB}],
             step[{{ mul[a,b,c]}}]
         }}" |> rmws
     let ast = 
@@ -387,9 +395,10 @@ let mulWorks (NormalFloat(a)) (NormalFloat(b)) =
 
 
 let sqrtWorks (NormalFloat(a)) =
+    let concA = sprintf "%.1f" (abs a)
     let inputProgram = 
         $"crn = {{
-            conc[a,{abs(a)}],
+            conc[a,{concA}],
             step[{{ sqrt[a,c]}}]
         }}" |> rmws
     let ast = 
