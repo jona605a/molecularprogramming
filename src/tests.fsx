@@ -330,14 +330,14 @@ let stepOrderDoesNotMatter (programIdx: int) =
 let addWorks (NormalFloat(a)) (NormalFloat(b)) =
     let inputProgram = 
         $"crn = {{
-            conc[a,{a}], conc[cInitial,{b}],
+            conc[a,{abs(a)}], conc[b,{abs(b)}],
             step[{{ add[a,b,c]}}]
         }}" |> rmws
     
     printfn "%A" inputProgram
 
     let ast = 
-        match run pprogram inputProgram with
+        match run pprogram inputProgram with 
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
@@ -348,7 +348,7 @@ let addWorks (NormalFloat(a)) (NormalFloat(b)) =
 let subWorks (NormalFloat(a)) (NormalFloat(b)) =
     let inputProgram = 
         $"crn = {{
-            conc[a,{a}], conc[cInitial,{b}],
+            conc[a,{abs(a)}], conc[b,{abs(b)}],
             step[{{ sub[a,b,c]}}]
         }}" |> rmws
     let ast = 
@@ -362,7 +362,7 @@ let subWorks (NormalFloat(a)) (NormalFloat(b)) =
 let divWorks (NormalFloat(a)) (NormalFloat(b)) =
     let inputProgram = 
         $"crn = {{
-            conc[a,{a}], conc[cInitial,{b}],
+            conc[a,{abs(a)}], conc[b,{abs(b)}],
             step[{{ div[a,b,c]}}]
         }}" |> rmws
     let ast = 
@@ -375,7 +375,7 @@ let divWorks (NormalFloat(a)) (NormalFloat(b)) =
 let mulWorks (NormalFloat(a)) (NormalFloat(b)) =
     let inputProgram = 
         $"crn = {{
-            conc[a,{a}], conc[cInitial,{b}],
+            conc[a,{abs(a)}], conc[b,{abs(b)}],
             step[{{ mul[a,b,c]}}]
         }}" |> rmws
     let ast = 
@@ -389,7 +389,7 @@ let mulWorks (NormalFloat(a)) (NormalFloat(b)) =
 let sqrtWorks (NormalFloat(a)) =
     let inputProgram = 
         $"crn = {{
-            conc[a,{a}],
+            conc[a,{abs(a)}],
             step[{{ sqrt[a,c]}}]
         }}" |> rmws
     let ast = 
