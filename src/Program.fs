@@ -14,6 +14,7 @@ open FParsec
 
 
 
+
 let printStateRange (ss: State seq) i j printSpecies =
     // Seq.skip i ss |> Seq.take j |> Seq.toList |> printfn "%A"
     let printSpecies s =
