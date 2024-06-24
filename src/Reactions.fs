@@ -24,7 +24,17 @@ let calcSpeciesChange (state: State) (crn: CRN) (s: species) =
     List.fold (fun chg rxn -> chg + (calcReactionEffect state rxn s)) 0.0 crn
 
 
-let simulationStep (state: State) (crn: CRN) (timestep: float) =
+let simulationStep (state: State) (crn: CRN) (timestep: float) occurringSpecies =
+    Map.add
+        "Ø"
+        0.0
+        (Set.fold
+            (fun st s -> Map.add s (max 0.00001 ((getValue state s) + ((calcSpeciesChange state crn s) * timestep))) st)
+            state
+            occurringSpecies)
+
+
+let simulateReactions (state: State) (crn: CRN) (timestep: float) =
     let occurringSpecies =
         Set.ofList (
             List.fold
@@ -36,18 +46,8 @@ let simulationStep (state: State) (crn: CRN) (timestep: float) =
                 crn
         )
 
-    Map.add
-        "Ø"
-        0.0
-        (Set.fold
-            (fun st s -> Map.add s (max 0.00001 (max 0 ((getValue state s) + ((calcSpeciesChange state crn s) * timestep)))) st)
-            state
-            occurringSpecies)
-
-
-let simulateReactions (state: State) (crn: CRN) (timestep: float) =
     Seq.unfold
         (fun (st, network, time) ->
-            let nextstate = simulationStep st network time
+            let nextstate = simulationStep st network time occurringSpecies
             Some((nextstate, (nextstate, network, time))))
         (state, crn, timestep)

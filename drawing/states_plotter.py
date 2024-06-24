@@ -29,8 +29,7 @@ def plot_to_file(data, filename, names_to_include=None):
     # Plot each species with a different color
     T = len(data[0])
 
-    times = [0] + list(map(lambda n : n-0.000001, range(1,T))) + list(range(1,T))
-    times.sort()
+    times = [0] + sum([[i-0.001,i] for i in range(1,T)], start=[])
     data = [sum([[i, i] for i in dat[:-1]], start=[]) + [dat[-1]] for dat in data]
     plt.figure(figsize=(10, 6))
     for i in range(len(data)):
