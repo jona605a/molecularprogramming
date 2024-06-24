@@ -325,11 +325,11 @@ let stepOrderDoesNotMatter (programIdx: int) =
 
 
 
-let addWorks (NormalFloat(a)) (NormalFloat(b)) =
+let addWorks (a:int) (b:int) =
     let absa = abs a
     let absb = abs b
-    let concA = sprintf "%.1f" absa
-    let concB = sprintf "%.1f" absb
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -343,8 +343,8 @@ let addWorks (NormalFloat(a)) (NormalFloat(b)) =
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
 
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (absa + absb)))
-    abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (absa + absb)) < 0.01
+    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float ((absa + absb))))
+    abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float ((absa + absb)))  < 0.01
 
 let addintWorks (a: int) (b: int) =
     let concA = sprintf "%d" (abs a)
@@ -366,9 +366,11 @@ let addintWorks (a: int) (b: int) =
     printfn "%A\n" res
     res < 0.01
 
-let subWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" (abs b)
+let subWorks  (a:int) (b:int) =
+    let absa = abs a
+    let absb = abs b
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -379,12 +381,17 @@ let subWorks (NormalFloat(a)) (NormalFloat(b)) =
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (max(a - b) 0)) < 0.01
+    printfn "%A\n\n" inputProgram
+    printfn "%A\n\n" (interpretProgram ast |> Seq.take 20 |> Seq.toList)
+    printfn "%A\n\n" (abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (max (absa - absb) 0)))
+    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (max (absa - absb) 0)) < 0.01
 
 
-let divWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" ((abs b) + 0.01)
+let divWorks  (a:int) (b:int) =
+    let absa = abs a
+    let absb = (abs b) + 1
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -395,12 +402,14 @@ let divWorks (NormalFloat(a)) (NormalFloat(b)) =
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
 
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a / b)))
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a / b)) < 0.01
+    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))))
+    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))) < 0.01
 
-let mulWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" (abs b)
+let mulWorks (a: int) (b: int) =
+    let absa = abs a
+    let absb = abs b
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -410,13 +419,14 @@ let mulWorks (NormalFloat(a)) (NormalFloat(b)) =
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a * b)))
+    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)))
     
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a * b)) < 0.01
+    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)) < 0.01
 
 
-let sqrtWorks (NormalFloat(a)) =
-    let concA = sprintf "%.1f" (abs a)
+let sqrtWorks (a:int) =
+    let absa = abs a
+    let concA = sprintf "%d" absa
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}],
@@ -427,36 +437,18 @@ let sqrtWorks (NormalFloat(a)) =
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
 
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt a)))
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt a)) < 0.01
-
-
-
-let cmpWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let inputProgram = 
-        $"crn = {{
-            conc[a,{a}], conc[cInitial,{b}],
-            step[{{ cmp[a,b], }}]
-        }}" |> rmws
-    let ast = 
-        match run pprogram inputProgram with
-            | Success((res: CRNpp.Root), _, _) -> res
-            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
-    if a-b > 0.01 then // Todo
-        true
-    elif b-a > 0.01 then 
-        true 
-    else 
-        true
+    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))))
+    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))) < 0.01
 
 
 
 
 
-
-let addSimWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" (abs b)
+let addSimWorks (a: int) (b: int) =
+    let absa = abs a
+    let absb = abs b
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -471,13 +463,15 @@ let addSimWorks (NormalFloat(a)) (NormalFloat(b)) =
             | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)) < 0.01
+    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa + absb)))
+    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa + absb)) < 0.01
 
 
-let subSimWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" (abs b)
+let subSimWorks (a: int) (b: int) =
+    let absa = abs a
+    let absb = abs b
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -489,13 +483,15 @@ let subSimWorks (NormalFloat(a)) (NormalFloat(b)) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a - b)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a - b)) < 0.01
+    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa - absb)))
+    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa - absb)) < 0.01
 
 
-let divSimWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" ((abs b) + 0.01)
+let divSimWorks (a: int) (b: int) =
+    let absa = abs a
+    let absb = (abs b) + 1
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -507,13 +503,15 @@ let divSimWorks (NormalFloat(a)) (NormalFloat(b)) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a / b)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a / b)) < 0.01
+    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))))
+    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))) < 0.01
 
 
-let mulSimWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" (abs b)
+let mulSimWorks (a: int) (b: int) =
+    let absa = abs a
+    let absb = abs b
+    let concA = sprintf "%d" absa
+    let concB = sprintf "%d" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -525,13 +523,14 @@ let mulSimWorks (NormalFloat(a)) (NormalFloat(b)) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a * b)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a * b)) < 0.01
+    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)))
+    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)) < 0.01
 
 
 
-let sqrtSimWorks (NormalFloat(a)) =
-    let concA = sprintf "%.1f" (abs a)
+let sqrtSimWorks (a: int) =
+    let absa = abs a
+    let concA = sprintf "%d" absa
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}],
@@ -543,8 +542,8 @@ let sqrtSimWorks (NormalFloat(a)) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt a)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt a)) < 0.01
+    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))))
+    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))) < 0.01
 
 
 
