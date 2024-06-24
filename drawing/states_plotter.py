@@ -41,6 +41,7 @@ def plot_to_file(data, filename, names_to_include=None):
     plt.title('Species Data Over Steps')
     plt.xlabel('Step')
     plt.ylabel('Value')
+    plt.grid()
     plt.legend()
 
     # Show the plot

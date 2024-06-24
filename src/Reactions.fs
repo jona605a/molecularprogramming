@@ -39,7 +39,7 @@ let simulationStep (state: State) (crn: CRN) (timestep: float) =
         "Ø"
         0.0
         (Set.fold
-            (fun st s -> Map.add s ((getValue state s) + (calcSpeciesChange state crn s) * timestep) st)
+            (fun st s -> Map.add s (max 0.00001 (max 0 ((getValue state s) + ((calcSpeciesChange state crn s) * timestep)))) st)
             state
             occurringSpecies)
 

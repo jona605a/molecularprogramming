@@ -6,15 +6,19 @@ open Reactions
 open ReactionsParser
 
 let listsToReaction l1 l2 =
-    let f l =
-        Map.ofList (List.map (fun x -> (x, 1.0)) l)
+    let f l =  List.fold (fun map s -> if Map.containsKey s map then Map.add s ((Map.find s map) + 1.0) map else Map.add s 1.0 map) Map.empty l
 
     Rxn(f l1, f l2, 1)
 
 
+let addTimeVars i (Rxn(r,p,c)) = 
+                    let timeVar = sprintf "T%d" (3 * i)
+                    Rxn(Map.add timeVar 1.0 r, Map.add timeVar 1.0 p, c)
 
 
-let rec commandToReactions cmd subcnt = 
+
+
+let rec commandToReactions cmd subcnt stepcnt=
     let ifReactionHelpVar =
         [ listsToReaction [ "Xgty"; "Xlty" ] [ "Xlty"; "CMP1" ]
           listsToReaction [ "Xgty"; "Xlty" ] [ "Xgty"; "CMP1" ]
@@ -51,7 +55,8 @@ let rec commandToReactions cmd subcnt =
 
         [ Rxn(f l1, f l2, k) ]
     | Cmp(x, y) ->
-        [ listsToReaction [ "Xgty"; y ] [ "Xlty"; y ] // normal cmp
+        List.map (addTimeVars stepcnt) (
+         [listsToReaction [ "Xgty"; y ] [ "Xlty"; y ] // normal cmp
           listsToReaction [ "Xlty"; x ] [ "Xgty"; x ]
 
           listsToReaction [ "Xegty"; y ] [ "Xelty"; y ] // x + eps
@@ -60,10 +65,11 @@ let rec commandToReactions cmd subcnt =
           listsToReaction [ "Yegtx"; x ] [ "Yeltx"; x ] // y + eps
           listsToReaction [ "Yeltx"; "Yeps" ] [ "Yegtx"; "Yeps" ]
 
-          // Need to be seperated
+          
           ]
-        @ commandToReactions (Add(x, "eps", "Xeps")) subcnt
-        @ commandToReactions (Add(y, "eps", "Yeps")) subcnt
+        @ commandToReactions (Add(x, "eps", "Xeps")) subcnt stepcnt
+        @ commandToReactions (Add(y, "eps", "Yeps")) subcnt stepcnt)
+        @ List.map (addTimeVars (stepcnt + 1)) ifReactionHelpVar
 
     | IfGT(cl) ->
         let tempReactions =
@@ -71,14 +77,14 @@ let rec commandToReactions cmd subcnt =
                 List.fold
                     (fun (st, sc) cmd ->
                         match cmd with
-                        | Sub(_) -> (st @ commandToReactions cmd sc, sc + 1)
-                        | cmd -> (st @ commandToReactions cmd sc, sc))
+                        | Sub(_) -> (st @ commandToReactions cmd sc stepcnt, sc + 1)
+                        | cmd -> (st @ commandToReactions cmd sc stepcnt, sc))
                     ([], subcnt)
                     cl
             )
 
-        ifReactionHelpVar
-        @ List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Xgty" 1 p, Map.add "Xgty" 1 r, c)) tempReactions
+        
+        List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Xgty" 1 p, Map.add "Xgty" 1 r, c)) tempReactions
 
     | IfGE(cl) ->
         let tempReactions =
@@ -86,28 +92,27 @@ let rec commandToReactions cmd subcnt =
                 List.fold
                     (fun (st, sc) cmd ->
                         match cmd with
-                        | Sub(_) -> (st @ commandToReactions cmd sc, sc + 1)
-                        | cmd -> (st @ commandToReactions cmd sc, sc))
+                        | Sub(_) -> (st @ commandToReactions cmd sc stepcnt, sc + 1)
+                        | cmd -> (st @ commandToReactions cmd sc stepcnt, sc))
                     ([], subcnt)
                     cl
             )
 
-        ifReactionHelpVar
-        @ List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Xegty" 1 p, Map.add "Xegty" 1 r, c)) tempReactions
+        
+        List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Xegty" 1 p, Map.add "Xegty" 1 r, c)) tempReactions
     | IfEQ(cl) ->
         let tempReactions =
             fst (
                 List.fold
                     (fun (st, sc) cmd ->
                         match cmd with
-                        | Sub(_) -> (st @ commandToReactions cmd sc, sc + 1)
-                        | cmd -> (st @ commandToReactions cmd sc, sc))
+                        | Sub(_) -> (st @ commandToReactions cmd sc stepcnt, sc + 1)
+                        | cmd -> (st @ commandToReactions cmd sc stepcnt, sc))
                     ([], subcnt)
                     cl
             )
 
-        ifReactionHelpVar
-        @ List.map
+        List.map
             (fun (Rxn(p, r, c)) ->
                 Rxn(Map.add "Yegtex" 1 (Map.add "Xegty" 1 p), Map.add "Yegtex" 1 (Map.add "Xegty" 1 r), c))
             tempReactions
@@ -117,61 +122,59 @@ let rec commandToReactions cmd subcnt =
                 List.fold
                     (fun (st, sc) cmd ->
                         match cmd with
-                        | Sub(_) -> (st @ commandToReactions cmd sc, sc + 1)
-                        | cmd -> (st @ commandToReactions cmd sc, sc))
+                        | Sub(_) -> (st @ commandToReactions cmd sc stepcnt, sc + 1)
+                        | cmd -> (st @ commandToReactions cmd sc stepcnt, sc))
                     ([], subcnt)
                     cl
             )
 
-        ifReactionHelpVar
-        @ List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Xlty" 1 p, Map.add "Xlty" 1 r, c)) tempReactions
+        
+        List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Xlty" 1 p, Map.add "Xlty" 1 r, c)) tempReactions
     | IfLE(cl) ->
         let tempReactions =
             fst (
                 List.fold
                     (fun (st, sc) cmd ->
                         match cmd with
-                        | Sub(_) -> (st @ commandToReactions cmd sc, sc + 1)
-                        | cmd -> (st @ commandToReactions cmd sc, sc))
+                        | Sub(_) -> (st @ commandToReactions cmd sc stepcnt, sc + 1)
+                        | cmd -> (st @ commandToReactions cmd sc stepcnt, sc))
                     ([], subcnt)
                     cl
             )
 
-        ifReactionHelpVar
-        @ List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Yegtx" 1 p, Map.add "Yegtx" 1 r, c)) tempReactions
+        
+        List.map (fun (Rxn(p, r, c)) -> Rxn(Map.add "Yegtx" 1 p, Map.add "Yegtx" 1 r, c)) tempReactions
 
 
 
-let stepToReactions (S(cl)) subcnt =
+let stepToReactions (S(cl)) subcnt stepcnt=
     List.fold
-        (fun (st, sc) cmd ->
+        (fun (st, sc, stc) cmd ->
             match cmd with
-            | Sub(_) -> (st @ commandToReactions cmd sc, sc + 1)
-            | cmd -> (st @ commandToReactions cmd sc, sc))
-        ([], subcnt)
+            | Sub(_) -> (List.map (addTimeVars stepcnt ) (st @ commandToReactions cmd sc stc), sc + 1, stc)
+            | Cmp(_) -> (st @commandToReactions cmd sc stc, sc, stc + 1)
+            | cmd -> (List.map (addTimeVars stepcnt ) (st @ commandToReactions cmd sc stc), sc, stc))
+        ([], subcnt, stepcnt)
         cl
 
 
 let compileSteps steplist =
-    let numOfSteps = List.length steplist
 
-    let reactions, _, _ =
+    let reactions, _, stepsTaken =
         List.fold
-            (fun (st, sc, stepcnt) step ->
-                let rxnlst, sc' = stepToReactions step sc
-                let timeVar = sprintf "T%d" (3 * stepcnt)
-                (st
-                 @ List.map
-                     (fun (Rxn(r, p, c)) -> Rxn(Map.add timeVar 1.0 r, Map.add timeVar 1.0 p, c))
-                     rxnlst,
+            (fun (st, sc, stc) step ->
+                let rxnlst, sc', stc' = stepToReactions step sc stc
+                (st @ rxnlst,
                  sc',
-                 stepcnt + 1))
+                 stc' + 1))
             ([], 0, 1)
             steplist
+    
+    let numOfSteps = stepsTaken - 1
 
     let temp = List.init (numOfSteps * 3 - 1) (fun x -> x + 1)
 
-    Rxn(Map.ofList [ (sprintf "T%d" (numOfSteps * 3), 1.0); ("T1", 1.0) ], Map.ofList [ ("T1", 2.0) ], 1)
+    (Rxn(Map.ofList [ (sprintf "T%d" (numOfSteps * 3), 1.0); ("T1", 1.0) ], Map.ofList [ ("T1", 2.0) ], 1)
     :: List.fold
         (fun st i ->
             Rxn(
@@ -181,17 +184,29 @@ let compileSteps steplist =
             )
             :: st)
         reactions
-        temp
+        temp), numOfSteps
 
 
 
 let compileCRN (R(conclist, steplist)) =
     let initState = getInitialState conclist
-    let reactions = compileSteps steplist
-    let numOfSteps = List.length steplist
+    let reactions,numOfSteps = compileSteps steplist
 
-    let compareVars = List.fold (fun st key -> Map.add key 0.5 st) initState [ "eps"; "Xgty"; "Xlty"; "Xegty"; "Xelty"; "Yegtx"; "Yeltx" ]
+    let compareVars =
+        List.fold
+            (fun st key -> Map.add key 0.5 st)
+            initState
+            [ "eps"; "Xgty"; "Xlty"; "Xegty"; "Xelty"; "Yegtx"; "Yeltx" ]
+
     let temp = List.init (numOfSteps * 3) (fun x -> x + 1)
-    let timeVarConc i = if i = 1 || i = 2 then 0.999 else 0.002 / float (numOfSteps * 3 - 2)
-    let timeVars = List.fold (fun st i -> Map.add (sprintf "T%d" i) (timeVarConc i)  st) compareVars temp
+
+    let timeVarConc i =
+        if i = 1 || i = 2 then
+            0.99999
+        else
+            0.00002 / float (numOfSteps * 3 - 2)
+
+    let timeVars =
+        List.fold (fun st i -> Map.add (sprintf "T%d" i) (timeVarConc i) st) compareVars temp
+
     timeVars, reactions

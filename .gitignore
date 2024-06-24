@@ -10,6 +10,7 @@ TestResults
 
 graphimgs/
 .config/
+outfiles/
 
 drawing/fsout/*
 drawing/graphs/*

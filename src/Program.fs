@@ -2,6 +2,7 @@
 
 module Main
 
+open CRNpp
 open CRNParser
 open CRNInterpreter
 open CRNCompiler
@@ -64,11 +65,13 @@ let main args =
 
 
         let initState, reactions = compileCRN ast
+        
+        let subIsolated = commandToReactions (Sub("a","b","c")) 0 0
 
         let simulation = simulateReactions initState reactions 0.01
 
-        printStateRange simulation 0 10000 []
-    //printf "%A" reactions
+        printStateRange simulation 0 40000 []
+        //printf "%A" reactions
 
 
 
