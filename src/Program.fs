@@ -68,7 +68,7 @@ let main args =
 
         let simulation = simulateReactions initState reactions 0.01
 
-        printStateRange simulation 0 40000 []//["T1";"T2";"T3";"T4";"T5";"T6";"c";"cnext";"Yegtx"]
+        printStateRange simulation 0 40000 ["a";"b";"r";"q";"Xegty";"Xelty";"Yegtx";"Yeltx"]
         //printf "%A" reactions
     else
         printfn "Program requires an argument giving a path to a .crn file"

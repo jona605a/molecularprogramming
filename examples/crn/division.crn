@@ -1,5 +1,5 @@
 crn={
-    conc[a,20], conc[b,3], conc[one,1],
+    conc[a,11], conc[b,3], conc[one,1],
     step[{
         cmp[a,b]
     }],

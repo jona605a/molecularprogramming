@@ -3,7 +3,9 @@ crn = {
     conc[b,12],
     step[{
         ld[a,atmp],
-        ld[b,btmp],
+        ld[b,btmp]
+    }],
+    step[{
         cmp[a,b]
     }],
     step[{
