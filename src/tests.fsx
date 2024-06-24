@@ -326,6 +326,22 @@ let stepOrderDoesNotMatter (programIdx: int) =
         && (implies (isTyped ast) ((sequenceEqual (interpretProgram ast) (interpretProgram shufSteps))))
 
 
+let stepSimOrderDoesNotMatter (programIdx: int) =
+    let inputProgram = programs.[programIdx % (List.length programs)] |> rmws
+    let ast = 
+        match run pprogram inputProgram with
+            | Success((res: CRNpp.Root), _, _) -> res
+            | Failure(errorMsg, _, _) -> R([], [])
+    if ast = R([], []) then true
+    else
+        let shufSteps = shuffleSteps ast
+        let initState, CRN = compileCRN ast
+        let initStateShuf, CRNShuf = compileCRN shufSteps
+
+        (isTyped ast = isTyped shufSteps)
+        && (implies (isTyped ast) ((sequenceEqual (simulateReactions initState CRN 0.01) (simulateReactions initStateShuf CRNShuf 0.01))))
+
+
 
 let addWorks (NormalFloat(a)) (NormalFloat(b)) =
     let concA = sprintf "%.1f" (abs a)
@@ -551,6 +567,7 @@ let cmpSimWorks (NormalFloat(a)) (NormalFloat(b)) =
 let config = { Config.Quick with MaxTest = 1000 }
 
 Check.One(config, stepOrderDoesNotMatter)
+Check.One(config, stepSimOrderDoesNotMatter)
 
 Check.One(config, addWorks)
 Check.One(config, subWorks)
