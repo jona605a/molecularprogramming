@@ -1,8 +1,7 @@
-file ?= out
+file ?= counter
 
 fsout:
-	dotnet run > drawing/fsout/$(file).out
+	dotnet run examples/crn/$(file).crn > outfiles/$(file).out
 
 draw: fsout
-	python drawing/python_tree_render.py drawing/fsout/$(file).out drawing/graphs/$(file)
-
+	python drawing/states_plotter.py outfiles/$(file).out outfiles/$(file)plot
