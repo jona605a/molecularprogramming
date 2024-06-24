@@ -5,6 +5,9 @@ open FParsec
 
 let ws = spaces
 
+let rmws (s: string) =
+    s.Replace(" ", "").Replace("\t", "").Replace("\n", "").Replace("\r", "")
+
 let identifier: Parser<string, unit> =
     let isIdentifierFirstChar c = isLetter c || c = '_'
     let isIdentifierChar c = isLetter c || isDigit c || c = '_'

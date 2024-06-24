@@ -8,7 +8,6 @@
 #load "Reactions.fs"
 #load "ReactionsParser.fs"
 #load "CRNCompiler.fs"
-#load "Program.fs"
 
 open System.Collections.Generic
 open FsCheck
@@ -21,7 +20,6 @@ open Reactions
 open ReactionsParser
 open CRNCompiler
 open FParsec
-open Main
 
 let validPrograms = ["crn = {
     conc[c,3], conc[cInitial, 3],
