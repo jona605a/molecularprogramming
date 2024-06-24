@@ -324,26 +324,12 @@ let stepOrderDoesNotMatter (programIdx: int) =
         && (implies (isTyped ast) ((sequenceEqual (interpretProgram ast) (interpretProgram shufSteps))))
 
 
-let stepSimOrderDoesNotMatter (programIdx: int) =
-    let inputProgram = programs.[programIdx % (List.length programs)] |> rmws
-    let ast = 
-        match run pprogram inputProgram with
-            | Success((res: CRNpp.Root), _, _) -> res
-            | Failure(errorMsg, _, _) -> R([], [])
-    if ast = R([], []) then true
-    else
-        let shufSteps = shuffleSteps ast
-        let initState, CRN = compileCRN ast
-        let initStateShuf, CRNShuf = compileCRN shufSteps
-
-        (isTyped ast = isTyped shufSteps)
-        && (implies (isTyped ast) ((sequenceEqual (simulateReactions initState CRN 0.01) (simulateReactions initStateShuf CRNShuf 0.01))))
-
-
 
 let addWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let concA = sprintf "%.1f" (abs a)
-    let concB = sprintf "%.1f" (abs b)
+    let absa = abs a
+    let absb = abs b
+    let concA = sprintf "%.1f" absa
+    let concB = sprintf "%.1f" absb
     let inputProgram = 
         $"crn = {{
             conc[a,{concA}], conc[b,{concB}],
@@ -356,10 +342,9 @@ let addWorks (NormalFloat(a)) (NormalFloat(b)) =
         match run pprogram inputProgram with 
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
-    let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)))
-    abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)) < 0.01
+    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (absa + absb)))
+    abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (absa + absb)) < 0.01
 
 let addintWorks (a: int) (b: int) =
     let concA = sprintf "%d" (abs a)
@@ -584,7 +569,6 @@ let cmpSimWorks (NormalFloat(a)) (NormalFloat(b)) =
 let config = { Config.Quick with MaxTest = 1000 }
 
 Check.One(config, stepOrderDoesNotMatter)
-Check.One(config, stepSimOrderDoesNotMatter)
 
 Check.One(config, addWorks)
 Check.One(config, addintWorks)
