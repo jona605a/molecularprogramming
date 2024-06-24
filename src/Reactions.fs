@@ -14,6 +14,7 @@ let getValue map s =
 let calcNetChange (Rxn(r, p, c)) (s: species) = (getValue p s) - (getValue r s)
 
 let calcReactionEffect (state: State) (Rxn(r, p, c)) (s: species) =
+
     c
     * (calcNetChange ((Rxn(r, p, c))) s)
     * (Map.fold (fun st reac mult -> st * (getValue state reac) ** mult) 1.0 r)
