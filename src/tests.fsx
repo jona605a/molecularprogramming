@@ -361,6 +361,25 @@ let addWorks (NormalFloat(a)) (NormalFloat(b)) =
     printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)))
     abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (a + b)) < 0.01
 
+let addintWorks (a: int) (b: int) =
+    let concA = sprintf "%d" (abs a)
+    let concB = sprintf "%d" (abs b)
+    let inputProgram = 
+        $"crn = {{
+            conc[a,{concA}], conc[b,{concB}],
+            step[{{ add[a,b,c] }}]
+        }}" |> rmws
+    
+    printfn "%A" inputProgram
+
+    let ast = 
+        match run pprogram inputProgram with 
+            | Success((res: CRNpp.Root), _, _) -> res
+            | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
+    // let initState, CRN = compileCRN ast
+    let res = (abs((interpretProgram ast |> Seq.skip 1000 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float(abs a + abs b))))
+    printfn "%A\n" res
+    res < 0.01
 
 let subWorks (NormalFloat(a)) (NormalFloat(b)) =
     let concA = sprintf "%.1f" (abs a)
@@ -568,6 +587,7 @@ Check.One(config, stepOrderDoesNotMatter)
 Check.One(config, stepSimOrderDoesNotMatter)
 
 Check.One(config, addWorks)
+Check.One(config, addintWorks)
 Check.One(config, subWorks)
 Check.One(config, divWorks)
 Check.One(config, mulWorks)
