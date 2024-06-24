@@ -15,7 +15,6 @@
     <Compile Include="src/ReactionsParser.fs" />
     <Compile Include="src/CRNCompiler.fs" />
     <Compile Include="src/TestingCRN.fsx" />
-    <Compile Include="src/tests.fsx" />
     <Compile Include="src/Program.fs" />
   </ItemGroup>
 
