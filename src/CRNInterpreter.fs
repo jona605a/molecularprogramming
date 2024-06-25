@@ -22,7 +22,7 @@ let rec doCommandList (cl: Command List) (state: State) =
     | [] -> state
     | Ld(x, y) :: clt -> doCommandList clt (Map.add y (getState x) state)
     | Add(x, y, z) :: clt -> doCommandList clt (Map.add z ((getState x) + (getState y)) state)
-    | Sub(x, y, z) :: clt -> doCommandList clt (Map.add z ((getState x) - (getState y)) state)
+    | Sub(x, y, z) :: clt -> doCommandList clt (Map.add z (max 0.0 ((getState x) - (getState y))) state)
     | Mul(x, y, z) :: clt -> doCommandList clt (Map.add z ((getState x) * (getState y)) state)
     | Div(x, y, z) :: clt -> doCommandList clt (Map.add z ((getState x) / (getState y)) state)
     | Sqrt(x, y) :: clt -> doCommandList clt (Map.add y (sqrt (getState x)) state)

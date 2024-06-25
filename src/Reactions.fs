@@ -47,7 +47,7 @@ let simulateReationsMatrix (state : State) (crn : CRN) (timestep : float) =
         ))
     let netChangeMatrix = genNetChangeMatrix crn sl
 
-    Seq.unfold (fun st -> let nextState = simulateStepMatrix state crn netChangeMatrix sl timestep
+    Seq.unfold (fun st -> let nextState = simulateStepMatrix st crn netChangeMatrix sl timestep
                           Some(nextState,nextState)) state
 
 

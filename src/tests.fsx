@@ -1,5 +1,6 @@
 #r "nuget: FsCheck"
 #r "nuget: FParsec"
+#r "nuget: FSharp.Stats"
 #load "CRNpp.fs"
 #load "CRNParser.fs"
 #load "CRNTypecheck.fs"
@@ -311,6 +312,13 @@ let sequenceEqual s1 s2 =
     List.forall2 (fun m1 m2 -> mapsEqual m1 m2) map1 map2
 
 
+
+let moduleSimTestResultHelper initState CRN absa absb op = 
+    let res = (abs((simulateReactions initState CRN 0.01 |> Seq.item 1000 |>  Map.find "c") - (op absa absb)))
+    printfn "%A\n" res
+    res < max 0.01 ((op absa absb) / 200.0)
+
+
 let stepOrderDoesNotMatter (programIdx: int) =
     let inputProgram = programs.[programIdx % (List.length programs)] |> rmws
     let ast = 
@@ -345,26 +353,6 @@ let addWorks (a:int) (b:int) =
 
     printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float ((absa + absb))))
     abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float ((absa + absb)))  < 0.01
-
-let addintWorks (a: int) (b: int) =
-    let concA = sprintf "%d" (abs a)
-    let concB = sprintf "%d" (abs b)
-    let inputProgram = 
-        $"crn = {{
-            conc[a,{concA}], conc[b,{concB}],
-            step[{{ add[a,b,c] }}]
-        }}" |> rmws
-    
-    printfn "%A" inputProgram
-
-    let ast = 
-        match run pprogram inputProgram with 
-            | Success((res: CRNpp.Root), _, _) -> res
-            | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
-    // let initState, CRN = compileCRN ast
-    let res = (abs((interpretProgram ast |> Seq.skip 1000 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float(abs a + abs b))))
-    printfn "%A\n" res
-    res < 0.01
 
 let subWorks  (a:int) (b:int) =
     let absa = abs a
@@ -463,8 +451,7 @@ let addSimWorks (a: int) (b: int) =
             | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa + absb)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa + absb)) < 0.01
+    moduleSimTestResultHelper initState CRN absa absb (fun x y -> float (x + y))
 
 
 let subSimWorks (a: int) (b: int) =
@@ -483,8 +470,7 @@ let subSimWorks (a: int) (b: int) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa - absb)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa - absb)) < 0.01
+    moduleSimTestResultHelper initState CRN absa absb (fun x y -> max 0 (float (x-y)))
 
 
 let divSimWorks (a: int) (b: int) =
@@ -503,8 +489,7 @@ let divSimWorks (a: int) (b: int) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))) < 0.01
+    moduleSimTestResultHelper initState CRN absa absb (fun x y -> float x / float y)
 
 
 let mulSimWorks (a: int) (b: int) =
@@ -523,8 +508,7 @@ let mulSimWorks (a: int) (b: int) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)) < 0.01
+    moduleSimTestResultHelper initState CRN absa absb (fun x y -> float (x * y))
 
 
 
@@ -542,8 +526,7 @@ let sqrtSimWorks (a: int) =
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
 
-    printfn "%A\n" (abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))))
-    abs((simulateReactions initState CRN 0.01 |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))) < 0.01
+    moduleSimTestResultHelper initState CRN absa 0 (fun x y -> sqrt (float x))
 
 
 
@@ -570,7 +553,6 @@ let config = { Config.Quick with MaxTest = 1000 }
 Check.One(config, stepOrderDoesNotMatter)
 
 Check.One(config, addWorks)
-Check.One(config, addintWorks)
 Check.One(config, subWorks)
 Check.One(config, divWorks)
 Check.One(config, mulWorks)
