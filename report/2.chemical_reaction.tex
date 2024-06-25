@@ -1,2 +1,36 @@
 \section{Chemical reactions}
 
+\subsection{Reactions and CRN}
+A reaction is just a set of reactants, a set of products, and a number $\kappa$ representing the speed of the reaction. Each reactant and product is some quantity of a species, these can be modelled as:  
+\begin{minted}{haskell}
+    type Reaction = Rxn of Map<species, float> * Map<species, float> * float
+\end{minted}
+Where the maps map a species to its concentration, the first map is the reactants, the second map is the products and the final float is $\kappa$.\\
+
+Then \texttt{CRN} can be defined as the union of all the reactions, which can be stored in a reaction list:
+\begin{minted}{haskell}
+    type CRN = Reaction List
+\end{minted}
+
+
+\subsection{Simulation}
+Now that the ODE we want to simulate is:
+$$\frac{d[S]}{dt}=\sum_{\forall rxn \in CRN} \kappa(rxn)\cdot netChange(S,rxn)\cdot\prod_{\forall R \in reactants(rxn)} [R]^{m_{rxn}(R)}(t)$$
+This can be broken down into components, making it straightforward to find the derivative for any $t$. Using the derivative, we can then simulate the reaction by stepping along the derivative. These calculations can be done using matrix calculus, which increases the speed due to the highly optimized library code.
+
+The \texttt{netChange} for species $s$ is found by
+\begin{minted}{haskell}
+    let calcNetChange (Rxn(r, p, c)) (s: species) = (getValue p s) - (getValue r s) 
+\end{minted}
+
+This and
+
+\begin{minted}
+    let genNetChangeList (crn : CRN) (s : species) = (List.foldBack (fun (Rxn(r,p,c)) st -> c * (calcNetChange (Rxn(r,p,c)) s) :: st) crn [])
+    \end{minted}
+
+
+\subsection{Testing}
+To test that the simulations work, simulations on the arithmetic components were tested in the same manner as in the previous section. Due to the slow convergence of the simulations, it is computationally intensive to test the larger programs. Therefore we did not make tests that compare the output from simulated programs to the calculated results. 
+
+\subsection{Assessment}

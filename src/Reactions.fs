@@ -33,7 +33,7 @@ let calcDerivatives (netChangeMatrix : Matrix<float>) (reactionProduct : Vector<
 
 let simulateStepMatrix (state : State) (crn : CRN) (netChangeMatrix : Matrix<float>) (sl : species List) (timestep : float) = 
     let change = calcDerivatives netChangeMatrix (calcReactionProducts state crn) timestep
-    List.fold (fun map (s,ds) -> Map.add s ((getValue state s) + ds) map) state (List.zip sl (List.ofArray (Vector.toArray change)))
+    Map.add "Ø" 0.0 (List.fold (fun map (s,ds) -> Map.add s ((getValue state s) + ds) map) state (List.zip sl (List.ofArray (Vector.toArray change))))
 
 let simulateReationsMatrix (state : State) (crn : CRN) (timestep : float) = 
     let sl = Set.toList (Set.ofList (

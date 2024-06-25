@@ -3,10 +3,12 @@ Declaration
 The students in the group are:
 Hans Henrik Hermansen (s194042), Jonathan S. Højlev (s194684) and Rani Ey. í Bø (s194067).
 
-The code and project was finished on 13-06-2024.
+The code and project was finished on 25-06-2024.
 
-We all helped each other in close to all aspects of the code and assignment. Therefore, there is a considerate overlap in responsibility. That being said, the main responsibilities are:
-Visualization of trees (text and code): Hans Henrik Hermansen
-Design (text and code): Jonathan S. Højlev
-Property-based testing (text and code): Rani Ey. í Bø
-Evaluation: Rani Ey. í Bø
+We all helped each other in close to all aspects of the code and assignment. Therefore, there is a considerable overlap in responsibility. That being said, the main responsibilities in the code are:
+
+State plotter: Rani Ey. í Bø, Jonathan Højlev
+CRNTypechack: Rani Ey. í Bø, Jonathan Højlev
+Testing: Rani Ey. í Bø
+
+And for the report:
