@@ -27,34 +27,32 @@ let rec doCommandList (cl: Command List) (state: State) =
     | Div(x, y, z) :: clt -> doCommandList clt (Map.add z ((getState x) / (getState y)) state)
     | Sqrt(x, y) :: clt -> doCommandList clt (Map.add y (sqrt (getState x)) state)
     | Cmp(x, y) :: clt ->
-        let xysum = (getState x) + (getState y)
-        let Xgt, Xlt = (getState x) / xysum, (getState y) / xysum
-        let XltState = Map.add "Xlt" Xlt state
-        let XgtState = Map.add "Xgt" Xgt XltState
-        doCommandList clt XgtState
+        let xestate = if getState x + 0.5 > getState y then Map.add "Xegty" 1.0 (Map.add "Xelty" 0.0 state) else Map.add "Xegty" 0.0 (Map.add "Xelty" 1.0 state)
+        let yestate = if getState y + 0.5 > getState x then Map.add "Yegtx" 1.0 (Map.add "Yeltx" 0.0 xestate) else Map.add "Yegtx" 0.0 (Map.add "Yeltx" 1.0 xestate)
+        doCommandList clt yestate
     | Rx(p, r, c) :: clt -> failwith "Cannot interpret custom reactions!"
     | IfGT(cmdl) :: clt ->
-        if getState "Xgt" > getState "Xlt" then
+        if getState "Yeltx" = 1.0 then
             doCommandList clt (doCommandList cmdl state)
         else
             doCommandList clt state
     | IfGE(cmdl) :: clt ->
-        if getState "Xgt" > getState "Xlt" || eqCheck (getState "Xgt") (getState "Xlt") then
+        if getState "Xegty" = 1.0 then
             doCommandList clt (doCommandList cmdl state)
         else
             doCommandList clt state
     | IfEQ(cmdl) :: clt ->
-        if eqCheck (getState "Xgt") (getState "Xlt") then
+        if getState "Xegty" = 1.0 && getState "Yegtx" = 1.0 then
             doCommandList clt (doCommandList cmdl state)
         else
             doCommandList clt state
     | IfLT(cmdl) :: clt ->
-        if getState "Xgt" < getState "Xlt" then
+        if getState "Xelty" = 1.0 then
             doCommandList clt (doCommandList cmdl state)
         else
             doCommandList clt state
     | IfLE(cmdl) :: clt ->
-        if getState "Xgt" < getState "Xlt" || eqCheck (getState "Xgt") (getState "Xlt") then
+        if getState "Yegtx" = 1.0 then
             doCommandList clt (doCommandList cmdl state)
         else
             doCommandList clt state

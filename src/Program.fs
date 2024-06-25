@@ -66,10 +66,13 @@ let main args =
         
         let subIsolated = commandToReactions (Sub("a","b","c")) 0 0
 
-        let simulation = simulateReationsMatrix initState reactions 0.01
+        let simulation = simulateReactionsMatrix initState reactions 0.01
 
+        let interpreterStates = interpretProgram ast
+        
+        //printStateRange interpreterStates 0 100 ["c";"cnext"]
 
-        printStateRange simulation 0 40000 ["a";"b";"T1";"T2";"T3"]
+        printStateRange simulation 0 10000 ["cnext";"c";"T1";"T2";"T3"]
 
 
         
