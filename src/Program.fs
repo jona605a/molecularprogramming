@@ -2,16 +2,12 @@
 
 module Main
 
-open CRNpp
 open CRNParser
 open CRNInterpreter
 open CRNCompiler
 open Reactions
-open ReactionsParser
 open Treecode
 open FParsec
-
-
 
 
 
@@ -54,24 +50,18 @@ let main args =
         let ast =
             match run pprogram inputProgram with
             | Success(res, _, _) -> res
-            | Failure(errorMsg, _, _) -> failwith "program not parsed"
+            | Failure(_, _, _) -> failwith "program not parsed"
 
-        let states = interpretProgram ast
-        //printStateRange states 0 100 []
-
-
-
+        // let states = interpretProgram ast
 
         let initState, reactions = compileCRN ast
         
-        let subIsolated = commandToReactions (Sub("a","b","c")) 0 0
+        // let subIsolated = commandToReactions (Sub("a","b","c")) 0 0
 
         let simulation = simulateReationsMatrix initState reactions 0.01
 
 
-        printStateRange simulation 0 20000 []
-
-
+        printStateRange simulation 0 40000 []
         
         //printf "%A" reactions
         ()
