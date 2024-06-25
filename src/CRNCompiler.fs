@@ -3,7 +3,6 @@ module CRNCompiler
 open CRNpp
 open CRNInterpreter
 open Reactions
-open ReactionsParser
 
 let listsToReaction l1 l2 =
     let f l =

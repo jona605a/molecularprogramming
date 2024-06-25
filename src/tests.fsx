@@ -7,20 +7,20 @@
 #load "Treecode.fs"
 #load "CRNInterpreter.fs"
 #load "Reactions.fs"
-#load "ReactionsParser.fs"
 #load "CRNCompiler.fs"
+// #load "ReactionsParser.fs"
 
-open System.Collections.Generic
 open FsCheck
+open FParsec
+
 open CRNpp
-open CRNTypecheck
 open CRNParser
+open CRNTypecheck
 open Treecode
 open CRNInterpreter
 open Reactions
-open ReactionsParser
 open CRNCompiler
-open FParsec
+// open ReactionsParser
 
 let validPrograms = ["crn = {
     conc[c,3], conc[cInitial, 3],
