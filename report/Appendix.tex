@@ -1,4 +1,59 @@
 \section{Appendix}
+\subsection{Our revised grammar}\label{sec:grammar_revised}
+\begin{tabbing}
+    $\langle \text{Crn} \rangle$ \,::=\; \= \texttt{'crn=\{'$\langle \text{ConcRootSList} \rangle$'\}'} \\
+    
+    $\langle \text{ConcRootSList} \rangle$ \,::=\;  $\langle \text{ConcS} \rangle$ ',' $\langle \text{ConcRootList} \rangle$ \\
+    
+     \>\textbar \, $\langle \text{RootSList} \rangle$ \\
+
+      $\langle \text{RootSList} \rangle$ \,::=\;  $\langle \text{StepS} \rangle$ \\
+
+      \>\textbar \, $\langle \text{StepS} \rangle$ ',' $\langle \text{RootSList} \rangle$ \\
+     
+    $\langle \text{ConcS} \rangle$ \,::=\;  \texttt{'conc['$\langle \text{species} \rangle$','$\langle \text{number} \rangle$']'} \\
+    
+    $\langle \text{StepS} \rangle$ \,::=\;  \texttt{'step['$\langle \text{CommandSList} \rangle$']'} \\
+    
+    $\langle \text{CommandSList} \rangle$ \,::=\;  $\langle \text{CommandS} \rangle$ \\
+    
+     \>\textbar \, $\langle \text{CommandS} \rangle$ \texttt{','} $\langle \text{CommandSList} \rangle$ \\
+     
+    $\langle \text{CommandS} \rangle$ \,::=\;  $\langle \text{RxnS} \rangle$ \\
+    
+     \>\textbar \, $\langle \text{ModuleS} \rangle$ \\
+     
+     \>\textbar \, $\langle \text{ConditionalS} \rangle$ \\
+     
+    $\langle \text{RxnS} \rangle$ \,::=\;  \texttt{'rxn['$\langle \text{Expr} \rangle$', '$\langle \text{Expr} \rangle$', '$\langle \text{number} \rangle$']'} \\
+    
+    $\langle \text{ModuleS} \rangle$ \,::=\;  \texttt{'ld['$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$']'} \\
+    
+     \>\textbar \, \texttt{'add['$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'sub['$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'mul['$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'div['$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'sqrt['$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'cmp['$\langle \text{species} \rangle$', '$\langle \text{species} \rangle$']'} \\
+     
+    $\langle \text{ConditionalS} \rangle$ \,::=\;  \texttt{'ifGT['$\langle \text{CommandSList} \rangle$']'} \\
+    
+     \>\textbar \, \texttt{'ifGE['$\langle \text{CommandSList} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'ifEQ['$\langle \text{CommandSList} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'ifLT['$\langle \text{CommandSList} \rangle$']'} \\
+     
+     \>\textbar \, \texttt{'ifLE['$\langle \text{CommandSList} \rangle$']'} \\
+     
+    $\langle \text{Expr} \rangle$ \,::=\;  \texttt{$\langle \text{species} \rangle$} 
+    \, \{\texttt{'$+$' $\langle \text{species} \rangle$}\}
+\end{tabbing}
 \pagenumbering{roman}
 
 \subsection{Structure}
@@ -6,11 +61,6 @@
 \subsection{Assessment of structure}
 
 
-
-\subsection{Figure 5 from the paper}
-
-
-\subsection{Pathological case from the paper}
 
 
 
