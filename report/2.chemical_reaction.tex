@@ -23,11 +23,18 @@ The \texttt{netChange} for species $s$ is found by
     let calcNetChange (Rxn(r, p, c)) (s: species) = (getValue p s) - (getValue r s) 
 \end{minted}
 
-This and
-
-\begin{minted}
-    let genNetChangeList (crn : CRN) (s : species) = (List.foldBack (fun (Rxn(r,p,c)) st -> c * (calcNetChange (Rxn(r,p,c)) s) :: st) crn [])
-    \end{minted}
+This and ...............:
+\begin{minted}{haskell}
+    let genNetChangeList (crn : CRN) (s : species) = 
+        (List.foldBack (fun (Rxn(r,p,c)) st -> 
+            c * (calcNetChange (Rxn(r,p,c)) s) :: st) crn [])
+\end{minted}
+Are then used to calculate a \texttt{NetChange} matrix:
+\begin{minted}{haskell}
+    let genNetChangeMatrix (crn : CRN) (sl : species List) = 
+        Matrix.ofJaggedList (List.foldBack (fun s st -> 
+            genNetChangeList crn s :: st) sl [])
+\end{minted}
 
 
 \subsection{Testing}
