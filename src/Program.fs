@@ -66,10 +66,17 @@ let main args =
         
         let subIsolated = commandToReactions (Sub("a","b","c")) 0 0
 
-        let simulation = simulateReactions initState reactions 0.01
+        let simulation = simulateReationsMatrix initState reactions 0.01
 
-        printStateRange simulation 0 40000 ["a";"b";"r";"q";"Xegty";"Xelty";"Yegtx";"Yeltx"]
+
+        //printStateRange simulation 0 40000 []
+
+        printfn "%A" (Seq.item 40000  simulation)
+
+
         //printf "%A" reactions
+        ()
+
     else
         printfn "Program requires an argument giving a path to a .crn file"
 

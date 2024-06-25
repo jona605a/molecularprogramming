@@ -1,6 +1,6 @@
 crn = {
-    conc[a,32],
-    conc[b,12],
+    conc[a,64],
+    conc[b,20],
     step[{
         ld[a,atmp],
         ld[b,btmp]
