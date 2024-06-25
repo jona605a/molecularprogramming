@@ -69,7 +69,7 @@ let main args =
         let simulation = simulateReationsMatrix initState reactions 0.01
 
 
-        printStateRange simulation 0 40000 ["c";"cnext";"T1";"T2";"T3"]
+        printStateRange simulation 0 40000 ["a";"b";"T1";"T2";"T3"]
 
 
         
