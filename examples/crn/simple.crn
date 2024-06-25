@@ -2,6 +2,6 @@ crn = {
     conc[a,32],
     conc[b,12],
     step[{
-        sub[a,b,c]
+        sqrt[b,c]
     }]
 }

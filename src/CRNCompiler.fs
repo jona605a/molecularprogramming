@@ -57,7 +57,7 @@ let rec commandToReactions cmd subcnt stepcnt =
     | Div(a, b, c) -> [ listsToReaction [ a ] [ a; c ]; listsToReaction [ b; c ] [ b ] ]
     | Sqrt(a, b) ->
         [ listsToReaction [ a ] [ a; b ]
-          Rxn(Map.ofList [ (b, 1); (b, 1) ], Map.ofList [ ("Ø", 1.0) ], 0.5) ]
+          Rxn(Map.ofList [ (b, 2) ], Map.ofList [ ("Ø", 1.0) ], 0.5) ]
     | Rx(l1, l2, k) ->
         let f l =
             Map.ofList (List.map (fun x -> (x, 1.0)) l)
