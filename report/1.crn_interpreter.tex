@@ -7,12 +7,12 @@ In the article \textit{CRN++: Molecular Programming Language}, Marko Vasic, Davi
 
 Looking at the grammar defined by the article in their listing 1.1, there are immediately some changes we would like to make. Besides this, we impose a few syntactic restrictions to ensure all parsed programs behave as expected. 
 
-In the following, our changes to the grammar is listed. 
+In the following, our changes to the grammar is listed. The complete revised grammar can be seen in appendix \ref{sec:grammar_revised}. 
 
 
 
 
-As stated in the article, the \texttt{ConcS} represents the starting concentration of the species. Thus a \texttt{conc['$\langle \text{A} \rangle$', '$\langle \text{64} \rangle$']} on line 32, effects the the concentration of \texttt{A} on line 16. We deemed this non-intuitive, and to force the concentrations to be stated at the top of the program. This was done by changing the \texttt{RootList}:
+As stated in the article, the rule \texttt{ConcS} represents the starting concentration of the species. Thus a \texttt{conc['$\langle \text{A} \rangle$', '$\langle \text{64} \rangle$']} on line 32, effects the the concentration of \texttt{A} on line 16. We deemed this non-intuitive, and to force the concentrations to be stated at the top of the program. This was done by changing the \texttt{RootList}:
 \begin{tabbing}
     $\langle \text{Crn} \rangle$ \,::=\; \= \texttt{crn= \{'$\langle \text{ConcList} \rangle$' ',' $\langle \text{StepList} \rangle$}\} \\
     
