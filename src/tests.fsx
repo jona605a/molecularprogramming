@@ -313,8 +313,8 @@ let sequenceEqual s1 s2 =
 
 
 
-let moduleSimTestResultHelper initState CRN absa absb op = 
-    let res = (abs((simulateReationsMatrix initState CRN 0.01 |> Seq.item 1000 |>  Map.find "c") - (op absa absb)))
+let moduleSimTestResultHelper initState crn absa absb op = 
+    let res = (abs((simulateReationsMatrix initState crn 0.01 |> Seq.item 1000 |>  Map.find "c") - (op absa absb)))
     printfn "%A\n" res
     res < max 0.01 ((op absa absb) / 200.0)
 

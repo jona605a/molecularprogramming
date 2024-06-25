@@ -38,7 +38,7 @@ let simulateStepMatrix (state : State) (crn : CRN) (netChangeMatrix : Matrix<flo
 let simulateReationsMatrix (state : State) (crn : CRN) (timestep : float) = 
     let sl = Set.toList (Set.ofList (
             List.fold
-                (fun sp (Rxn(r, p, c)) ->
+                (fun sp (Rxn(r, p, _)) ->
                     Map.fold (fun keys k _ -> k :: keys) [] r
                     @ Map.fold (fun keys k _ -> k :: keys) [] p
                     @ sp)
@@ -80,7 +80,7 @@ let simulateReactions (state: State) (crn: CRN) (timestep: float) =
     let occurringSpecies =
         Set.ofList (
             List.fold
-                (fun sp (Rxn(r, p, c)) ->
+                (fun sp (Rxn(r, p, _)) ->
                     Map.fold (fun keys k _ -> k :: keys) [] r
                     @ Map.fold (fun keys k _ -> k :: keys) [] p
                     @ sp)
