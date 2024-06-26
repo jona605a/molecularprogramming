@@ -9,7 +9,7 @@ Looking at the grammar defined by the article in their listing 1.1, there are im
 
 In the following, our changes to the grammar is listed. The complete revised grammar can be seen in appendix \ref{sec:grammar_revised}. 
 
-In the article's grammar, it is possible to interchange \texttt{'conc'} and \texttt{'step'} rules, which means a \texttt{'conc'} rule in the bottom of a program could set the concentration of a species used in the beginning. We deemed this unintuitive and in our grammar, all \texttt{'conc'} rules must come before all \texttt{'step'} rules. This was done by changing the beginning of the program to the following:
+In the article's grammar, it is possible to interchange \texttt{'conc'} and \texttt{'step'} rules, which means a \texttt{'conc'} rule in the bottom of a program could set the concentration of a species used in the beginning. We deemed this unintuitive and in our grammar all \texttt{'conc'} rules must come before all \texttt{'step'} rules. This was done by changing the first rules of the grammar to the following:
 \begin{tabbing}
     $\langle \text{Crn} \rangle$ \,::=\; \= \texttt{'crn=\{'$\langle \text{ConcRootSList} \rangle$'\}'} \\
     
@@ -27,16 +27,17 @@ Other than \texttt{ConcS}, there are also other restrictions, all of which we fo
 
 
 \subsection{Abstract syntax tree (AST)}
+Having a grammar suitable for our needs, we can now define F\# types that comprise our model for the abstract syntax tree used for the compiler. These type declarations are given as follows. 
 
 The AST is rooted in Root: 
 \begin{minted}{haskell}
     type Root = R of Conc List * Step List
 \end{minted}
-Which forces all the \texttt{Concs} to come before the steps, where Conc is defined as:
+which forces all concentration definitions to come before the steps, where Conc is defined as:
 \begin{minted}{haskell}
     type Conc = C of species * float
 \end{minted}
-This is then followed by all the \texttt{Steps}:
+Each step is comprised of a list of \texttt{Commands} like so
 \begin{minted}{haskell}
     type Step = S of Command List
 \end{minted}
@@ -61,6 +62,16 @@ And \texttt{species} is just a string, that signifies the name of the species:
 \begin{minted}{haskell}
     type species = string
 \end{minted}
+
+Using this structure for the AST, the \texttt{discrete counter} program can be visualized as seen in figure \ref{fig:ast_counter}. 
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=\textwidth]{report/figures/ast_counter.png}
+    \caption{AST for the discrete counter program}
+    \label{fig:ast_counter}
+\end{figure}
+
 The tree representation of the ..... program can be seen below:
 \subsection{Parser}
 
