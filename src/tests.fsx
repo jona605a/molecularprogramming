@@ -526,7 +526,7 @@ let sqrtSimWorks (a: int) =
 
 
 let interpreterAndSimAgree (programIdx : int) = 
-    let inputProgram = programs.[abs(programIdx) % (List.length programs)] |> rmws
+    let inputProgram = validPrograms.[abs(programIdx) % (List.length validPrograms)] |> rmws
     let ast = 
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
