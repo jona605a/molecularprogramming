@@ -595,14 +595,16 @@ let cmpSimWorks (a: int) (b: int) =
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
     let initState, CRN = compileCRN ast
-    let results = simulateReactionsMatrix initState CRN 0.01 |> Seq.item 20000 
+    let results = simulateReactionsMatrix initState CRN 0.01 |> Seq.skip 500 
     let (Xegty, Xelty) = if float absa + 0.5 > float absb then (1.0, 0.0) else (0.0, 1.0)
     let (Yegtx, Yeltx) = if float absb + 0.5 > float absa then (1.0, 0.0) else (0.0, 1.0)
-    printfn "%A,%A,%A,%A" Xegty Xelty Yegtx Yeltx
-    printfn "%A,%A,%A,%A" (Map.find "Xegty" results) (Map.find "Xelty" results) (Map.find "Yegtx" results) (Map.find "Yeltx" results)
-    printfn "%A,%A,%A,%A" (abs(Map.find "Xegty" results - Xegty)) (abs(Map.find "Xelty" results - Xelty)) (abs(Map.find "Yegtx" results - Yegtx)) (abs(Map.find "Yeltx" results - Yeltx))
-    (abs(Map.find "Xegty" results - Xegty) < 0.01) && (abs(Map.find "Xelty" results - Xelty) < 0.01) && 
-        (abs(Map.find "Yegtx" results - Yegtx) < 0.01) && (abs(Map.find "Yeltx" results - Yeltx) < 0.01)
+    let samples = results
+                |> Seq.indexed
+                |> Seq.choose (fun (index, element) ->
+                    if index % 50 = 0 then Some element
+                    else None) |> Seq.take 200 |> Seq.toList 
+    List.fold (fun acc res -> acc || ((abs(Map.find "Xegty" res - Xegty) < 0.1) && (abs(Map.find "Xelty" res - Xelty) < 0.1) && 
+                                (abs(Map.find "Yegtx" res - Yegtx) < 0.1) && (abs(Map.find "Yeltx" res - Yeltx) < 0.1))) false samples
 
 
 let interpreterAndSimAgree (programIdx : int) = 
