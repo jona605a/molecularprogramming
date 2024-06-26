@@ -1,4 +1,4 @@
-﻿// For more information see https://aka.ms/fsharp-console-apps
+﻿// Jonathan Højlev, 26/6
 
 module Main
 
@@ -24,7 +24,7 @@ let printStateRange (ss: State seq) i j printSpecies =
         | (spec, conc) :: xs when printSpecies spec ->
             printfn "%s %A" spec conc
             printStateAsList xs
-        | (spec, conc) :: xs -> printStateAsList xs
+        | _ :: xs -> printStateAsList xs
 
     let rec printrec =
         function

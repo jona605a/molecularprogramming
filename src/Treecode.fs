@@ -1,3 +1,5 @@
+// Jonathan Højlev, 26/6
+
 module Treecode
 
 type Tree<'a> = Node of 'a * (Tree<'a> list)

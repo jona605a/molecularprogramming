@@ -1,3 +1,4 @@
+# Jonathan Højlev, 26/6
 
 import sys
 import os
