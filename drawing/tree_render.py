@@ -1,3 +1,5 @@
+# Hans Henrik Hermansen 26/6
+
 import graphviz
 
 import sys
