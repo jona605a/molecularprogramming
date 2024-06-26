@@ -35,7 +35,7 @@ let printStateRange (ss: State seq) i j printSpecies =
 
     printrec l
 
-let printAst ast = design (astToTree ast) |> printfn "%A"
+let printAst ast = design (astToTree ast) |> designtostring |> printfn "%s"
 
 
 [<EntryPoint>]
@@ -43,29 +43,27 @@ let main args =
 
     let readFile filePath = System.IO.File.ReadAllText(filePath)
 
-    if args.Length > 0 then
+    if args.Length = 1 then
         let inputProgram = readFile args[0] |> rmws
-        //printfn "%s" inputProgram
-
+        
         let ast =
             match run pprogram inputProgram with
             | Success(res, _, _) -> res
             | Failure(_, _, _) -> failwith "program not parsed"
 
-        // let states = interpretProgram ast
-
         let initState, reactions = compileCRN ast
         
-        // let subIsolated = commandToReactions (Sub("a","b","c")) 0 0
-
         let simulation = simulateReationsMatrix initState reactions 0.01
 
-
         printStateRange simulation 0 40000 []
-        
-        //printf "%A" reactions
-        ()
-
+                
+    else if args.Length = 2 then
+        let inputProgram = readFile args[0] |> rmws
+        let ast =
+            match run pprogram inputProgram with
+            | Success(res, _, _) -> res
+            | Failure(_, _, _) -> failwith "program not parsed"
+        printAst ast
     else
         printfn "Program requires an argument giving a path to a .crn file"
 
