@@ -427,6 +427,20 @@ let sqrtWorks (a:int) =
     abs((interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))) < 0.01
 
 
+let loadWorks (a:int) =
+    let absa = abs a
+    let concA = sprintf "%d" absa
+    let inputProgram = 
+        $"crn = {{
+            conc[a,{concA}],
+            step[{{ ld[a,c]}}]
+        }}" |> rmws
+    let ast = 
+        match run pprogram inputProgram with
+            | Success((res: CRNpp.Root), _, _) -> res
+            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
+    let initState, _ = compileCRN ast
+    abs((interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa)) < 0.01
 
 
 
@@ -527,6 +541,23 @@ let sqrtSimWorks (a: int) =
     moduleSimTestResultHelper initState CRN absa 0 (fun x y -> sqrt (float x))
 
 
+let loadSimWorks (a: int) =
+    let absa = abs a
+    let concA = sprintf "%d" absa
+    let inputProgram = 
+        $"crn = {{
+            conc[a,{concA}],
+            step[{{ ld[a,c]}}]
+        }}" |> rmws
+    let ast = 
+        match run pprogram inputProgram with
+            | Success((res: CRNpp.Root), _, _) -> res
+            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
+    let initState, CRN = compileCRN ast
+
+    moduleSimTestResultHelper initState CRN absa 0 (fun x y -> float x)
+
+
 let interpreterAndSimAgree (programIdx : int) = 
     let inputProgram = validPrograms.[abs(programIdx) % (List.length validPrograms)] |> rmws
     let ast = 
@@ -559,11 +590,13 @@ Check.One(config, subWorks)
 Check.One(config, divWorks)
 Check.One(config, mulWorks)
 Check.One(config, sqrtWorks)
+Check.One(config, loadWorks)
 
 Check.One(config, addSimWorks)
 Check.One(config, subSimWorks)
 Check.One(config, divSimWorks)
 Check.One(config, mulSimWorks)
 Check.One(config, sqrtSimWorks)
+Check.One(config, loadSimWorks)
 
 Check.One(config, interpreterAndSimAgree)
