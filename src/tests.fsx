@@ -1,3 +1,5 @@
+// Rani Ey. í Bø 26/06
+
 #r "nuget: FsCheck"
 #r "nuget: FParsec"
 #r "nuget: FSharp.Stats"

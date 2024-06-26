@@ -1,4 +1,4 @@
-// Jonathan Højlev, 26/6
+// Jonathan Højlev, 26/6 // Rani Ey. í Bø 26/06
 
 module CRNTypecheck
 
