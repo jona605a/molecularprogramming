@@ -326,7 +326,7 @@ let stepOrderDoesNotMatter (programIdx: int) =
     else
         let initState, _ = compileCRN ast
         let shufSteps = shuffleSteps ast
-        (isTyped ast = isTyped shufSteps) ||
+        (isTyped ast = isTyped shufSteps) &&
         (implies (isTyped ast) ((sequenceEqual (interpretProgram ast initState) (interpretProgram shufSteps initState))))
 
 
