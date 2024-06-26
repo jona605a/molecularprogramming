@@ -1,5 +1,42 @@
 \section{Compiling CRN++ to chemical reactions}
 
+\subsection{Compiler}
+Most of the functionality of the compiler is contained in the function \texttt{commandToReactions}. This function is responsible for converting a command to a list of reactions corresponding to its CRN. For most of the commands this is quite simple. However, when the compiler is extended to include time step variables and conditional statements things become a bit more complicated. The details of the implementation can be viewed in the code but here we will cover how we dealt with two main problems
+\begin{itemize}
+    \item How we added time step variables
+    \item If statements and catalysing the relevant reactions properly
+\end{itemize}
+\paragraph{Time variables}
+Like in the article we have three time variables for each step not containing a \texttt{cmp} command. A step containing \texttt{cmp} must contain three additional time variables in order to split the AM algorithm CRN from all other reactions. Therefore we ensure that the function \texttt{compileSteps} tracks how many actual time steps are created, as this number often is different from the number of \texttt{step} tokens in the program. Finally the function \texttt{compileSteps} adds the reactions for the time variables $T_i$. Namely the reactions 
+\begin{align*}
+    T_i + T_{i+1} &\rightarrow 2 T_{i+1} \quad\text{ for } i \in [1,n-1]\\
+    T_1 + T_n &\rightarrow 2 T_1
+\end{align*}
+The sum of the concentrations of the time variables is equal to 2, like the article. This actually accelerates all reactions by a factor of 2, but since the $\kappa$ coefficients are unit less, this plays no role. Furthermore, the initial values are 
+\begin{align*}
+    T_1 &= T_2 = 0.99999\\
+    T_i &= \frac{0.00002}{n-2} \quad\text{ for } i \in [3,n]
+\end{align*}
+A plot of the time variables along-side the counter program can be seen in figure \ref{fig:counter_time} in the appendix. 
+\paragraph{If statements}
+As we want to support equality checking like the article, we need have the helper species \texttt{Xegty, Xelty, Yegtx} and \texttt{Yeltx}. To compare species \texttt{X} to \texttt{Y} we first generate $\texttt{Xeps} = \texttt{X} + 0.5$ and $\texttt{Yeps} = \texttt{Y} + 0.5$ and then compare \texttt{Xeps} to \texttt{Y} and $\texttt{Yeps}$ to \texttt{X} by creating the mapping and AM algorithm CRNs for them. As we now have chosen that two species are equal if their concentrations are within 0.5 of each other, this affects when a species is greater than or less than another. This is not explained very well in the article but this essentially means that \texttt{X} is only larger than \texttt{Y} if \texttt{X} $>$ \texttt{Y} + 0.5. Therefore we catalyze conditional reactions in the following way
+\begin{itemize}
+    \item \texttt{ifGE} we catalyze with \texttt{Xegty} as this is 1.0 when \texttt{X} $>$ \texttt{Y} and when \texttt{X} = \texttt{Y}.
+    \item \texttt{ifGT} we catalyze with \texttt{Yeltx} as this is 1.0 when \texttt{X}  $>$ \texttt{Y} + 0.5.
+    \item \texttt{ifEQ} we catalyze with both \texttt{Xegty} and \texttt{Yegty} as these are both 1.0 only when \texttt{X} = \texttt{Y}.
+    \item \texttt{ifLE} we catalyze with \texttt{Yegtx} as this is 1.0 when \texttt{Y} $>$ \texttt{X} and when \texttt{X} = \texttt{Y}:
+    \item \texttt{ifLT} we catalyze with \texttt{Xelty} as this is 1.0 when \texttt{X} + 0.5  $<$ \texttt{Y}.
+
+\end{itemize}
+
+Other than the things we just mentioned the compiler is rather intuitive. Compile each step in order and finally combine the resulting reactions to a single list. We of course also compile the \texttt{conc} statements to the initial state.
+
 
 
 \subsection{Testing}
+To validate whether the simulation and the interpreter results are close to equal, the list of valid programs mentioned earlier is modified to be able to take random integers from \texttt{FsCheck} in place of the variables. What we found, is that in most cases, they are identical, but after 613 tests, there was a divergence due to compounding rounding errors that eventually led to \texttt{nan} values for the simulated program.
+However, we find that passing 612 tests before failing on a rounding error shows the robustness of the equality of the interpreter and the simulator.
+
+
+\subsection{Assessment}
+Overall we were very happy with our resulting compiler. There were quite a few problems along the way as the article does not do a very good job of explaining things like how to catalyze conditional statements, but figuring out the solution to these problems was very satisfying.
