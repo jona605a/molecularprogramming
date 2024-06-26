@@ -1,3 +1,4 @@
+// Hans Henrik Hermansen 26/06 // Rani Ey. í Bø 26/06
 module Reactions
 
 open CRNpp

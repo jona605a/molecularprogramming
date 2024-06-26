@@ -1,4 +1,4 @@
-// Jonathan Højlev, 26/6
+// Hans Henrik Hermansen 26/06 // Jonathan Højlev 26/06
 
 module CRNCompiler
 
