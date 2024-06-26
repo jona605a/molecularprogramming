@@ -306,7 +306,6 @@ let sequenceEqual (s1 : seq<State>) (s2 : seq<State>) =
     
     let map1 = Seq.take 5 s1 |> Seq.toList
     let map2 = Seq.take 5 s2 |> Seq.toList
-    printfn "%A\n%A" map1 map2
     List.forall2 (fun m1 m2 -> mapsEqual m1 m2) map1 map2
 
 
@@ -325,9 +324,10 @@ let stepOrderDoesNotMatter (programIdx: int) =
             | Failure(errorMsg, _, _) -> R([], [])
     if ast = R([], []) then true
     else
+        let initState, _ = compileCRN ast
         let shufSteps = shuffleSteps ast
         (isTyped ast = isTyped shufSteps) ||
-        (implies (isTyped ast) ((sequenceEqual (interpretProgram ast) (interpretProgram shufSteps))))
+        (implies (isTyped ast) ((sequenceEqual (interpretProgram ast initState) (interpretProgram shufSteps initState))))
 
 
 
@@ -350,8 +350,8 @@ let addWorks (a:int) (b:int) =
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith $"Should not be reachable {errorMsg}"
 
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float ((absa + absb))))
-    abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float ((absa + absb)))  < 0.01
+    let initState, _ = compileCRN ast
+    abs((interpretProgram ast initState |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float ((absa + absb)))  < 0.01
 
 let subWorks  (a:int) (b:int) =
     let absa = abs a
@@ -367,11 +367,10 @@ let subWorks  (a:int) (b:int) =
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
+
+    let initState, _ = compileCRN ast
     
-    printfn "%A\n\n" inputProgram
-    printfn "%A\n\n" (interpretProgram ast |> Seq.take 20 |> Seq.toList)
-    printfn "%A\n\n" (abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (max (absa - absb) 0)))
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (max (absa - absb) 0)) < 0.01
+    abs((interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (max (absa - absb) 0)) < 0.01
 
 
 let divWorks  (a:int) (b:int) =
@@ -387,10 +386,10 @@ let divWorks  (a:int) (b:int) =
     let ast = 
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
-            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
+            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"    
 
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))))
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))) < 0.01
+    let initState, _ = compileCRN ast
+    abs((interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa / (float absb))) < 0.01
 
 let mulWorks (a: int) (b: int) =
     let absa = abs a
@@ -406,9 +405,8 @@ let mulWorks (a: int) (b: int) =
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)))
-    
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)) < 0.01
+    let initState, _ = compileCRN ast    
+    abs((interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - float (absa * absb)) < 0.01
 
 
 let sqrtWorks (a:int) =
@@ -423,9 +421,8 @@ let sqrtWorks (a:int) =
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
             | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
-
-    printfn "%A\n" (abs((interpretProgram ast |> Seq.skip 100 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))))
-    abs((interpretProgram ast |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))) < 0.01
+    let initState, _ = compileCRN ast
+    abs((interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (sqrt (float absa))) < 0.01
 
 
 
@@ -540,8 +537,9 @@ let interpreterAndSimAgree (programIdx : int) =
 
 
     if ast = R([], []) then true else 
+    let initState, _ = compileCRN ast    
     not (isTyped ast) ||
-    let interpreterState = Seq.item 0 (interpretProgram ast)
+    let interpreterState = Seq.item 0 (interpretProgram ast initState)
     let initState,crn = compileCRN ast
     let simulationState = Seq.item 2000 (simulateReactionsMatrix initState crn 0.01)
     let speciesToCheck = Map.fold (fun st k v -> if not (Set.contains k ignoreSet) then Set.add k st else st) Set.empty interpreterState

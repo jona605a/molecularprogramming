@@ -61,12 +61,11 @@ let rec doCommandList (cl: Command List) (state: State) =
 let doStep (S(cl): Step) (state: State) : State = doCommandList cl state
 
 
-let interpretProgram (R(concl, stepl)) =
+let interpretProgram (R(concl, stepl)) (initialState: State)=
 
     if not (isTyped (R(concl, stepl))) then
         failwith "Does not typecheck"
     else
-        let initialState = getInitialState concl
 
         Seq.unfold
             (fun (state, i) ->
