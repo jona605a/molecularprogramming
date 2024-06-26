@@ -314,7 +314,7 @@ let sequenceEqual (s1 : seq<State>) (s2 : seq<State>) =
 
 let moduleSimTestResultHelper initState crn absa absb op = 
     let res = (abs((simulateReactionsMatrix initState crn 0.01 |> Seq.item 1000 |>  Map.find "c") - (op absa absb)))
-    printfn "%A\n" res
+    //printfn "%A\n" res
     res < max 0.01 ((op absa absb) / 200.0)
 
 
@@ -443,6 +443,28 @@ let loadWorks (a:int) =
     abs((interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head |>  Map.find "c") - (float absa)) < 0.01
 
 
+let cmpWorks (a: int) (b: int) =
+    let absa = abs a
+    let concA = sprintf "%d" absa
+    let absb = abs b
+    let concB = sprintf "%d" absb
+    let inputProgram = 
+        $"crn = {{
+            conc[a,{concA}],conc[b,{concB}],
+            step[{{ cmp[a,b]}}]
+        }}" |> rmws
+    let ast = 
+        match run pprogram inputProgram with
+            | Success((res: CRNpp.Root), _, _) -> res
+            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
+    let initState, _ = compileCRN ast
+    let results = interpretProgram ast initState |> Seq.skip 30 |> Seq.take 1 |> Seq.toList |> List.head
+    let (Xegty, Xelty) = if float absa + 0.5 > float absb then (1.0, 0.0) else (0.0, 1.0)
+    let (Yegtx, Yeltx) = if float absb + 0.5 > float absa then (1.0, 0.0) else (0.0, 1.0)
+    abs(Map.find "Xegty" results - Xegty) < 0.01 && abs(Map.find "Xelty" results - Xelty) < 0.01 && 
+        abs(Map.find "Yegtx" results - Yegtx) < 0.01 && abs(Map.find "Yeltx" results - Yeltx) < 0.01
+        
+
 
 let addSimWorks (a: int) (b: int) =
     let absa = abs a
@@ -558,6 +580,31 @@ let loadSimWorks (a: int) =
     moduleSimTestResultHelper initState CRN absa 0 (fun x y -> float x)
 
 
+let cmpSimWorks (a: int) (b: int) =
+    let absa = abs a
+    let concA = sprintf "%d" absa
+    let absb = abs b
+    let concB = sprintf "%d" absb
+    let inputProgram = 
+        $"crn = {{
+            conc[a,{concA}],conc[b,{concB}],
+            step[{{ cmp[a,b]}}]
+        }}" |> rmws
+    let ast = 
+        match run pprogram inputProgram with
+            | Success((res: CRNpp.Root), _, _) -> res
+            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
+    let initState, CRN = compileCRN ast
+    let results = simulateReactionsMatrix initState CRN 0.01 |> Seq.item 20000 
+    let (Xegty, Xelty) = if float absa + 0.5 > float absb then (1.0, 0.0) else (0.0, 1.0)
+    let (Yegtx, Yeltx) = if float absb + 0.5 > float absa then (1.0, 0.0) else (0.0, 1.0)
+    printfn "%A,%A,%A,%A" Xegty Xelty Yegtx Yeltx
+    printfn "%A,%A,%A,%A" (Map.find "Xegty" results) (Map.find "Xelty" results) (Map.find "Yegtx" results) (Map.find "Yeltx" results)
+    printfn "%A,%A,%A,%A" (abs(Map.find "Xegty" results - Xegty)) (abs(Map.find "Xelty" results - Xelty)) (abs(Map.find "Yegtx" results - Yegtx)) (abs(Map.find "Yeltx" results - Yeltx))
+    (abs(Map.find "Xegty" results - Xegty) < 0.01) && (abs(Map.find "Xelty" results - Xelty) < 0.01) && 
+        (abs(Map.find "Yegtx" results - Yegtx) < 0.01) && (abs(Map.find "Yeltx" results - Yeltx) < 0.01)
+
+
 let interpreterAndSimAgree (programIdx : int) = 
     let inputProgram = validPrograms.[abs(programIdx) % (List.length validPrograms)] |> rmws
     let ast = 
@@ -591,6 +638,7 @@ Check.One(config, divWorks)
 Check.One(config, mulWorks)
 Check.One(config, sqrtWorks)
 Check.One(config, loadWorks)
+Check.One(config, cmpWorks)
 
 Check.One(config, addSimWorks)
 Check.One(config, subSimWorks)
@@ -598,5 +646,6 @@ Check.One(config, divSimWorks)
 Check.One(config, mulSimWorks)
 Check.One(config, sqrtSimWorks)
 Check.One(config, loadSimWorks)
+Check.One(config, cmpSimWorks)
 
 Check.One(config, interpreterAndSimAgree)
