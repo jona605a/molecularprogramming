@@ -60,8 +60,32 @@ let rec doCommandList (cl: Command List) (state: State) =
 
 let doStep (S(cl): Step) (state: State) : State = doCommandList cl state
 
+let rec findSpeciesInStep cl =  
+    match cl with
+    | [] -> Set.empty
+    | Ld(a,b)::clt -> Set.union (set [a;b]) (findSpeciesInStep clt)
+    | Sqrt(a,b)::clt -> Set.union (set [a;b]) (findSpeciesInStep clt)
+    | Cmp(a,b)::clt -> Set.union (set [a;b]) (findSpeciesInStep clt)
+    | Add(a,b,c)::clt -> Set.union (set [a;b;c]) (findSpeciesInStep clt)
+    | Sub(a,b,c)::clt -> Set.union (set [a;b;c]) (findSpeciesInStep clt)
+    | Div(a,b,c)::clt -> Set.union (set [a;b;c]) (findSpeciesInStep clt)
+    | Mul(a,b,c)::clt -> Set.union (set [a;b;c]) (findSpeciesInStep clt)
+    | IfGT(cmdl) :: clt -> Set.union (findSpeciesInStep cmdl) (findSpeciesInStep clt)
+    | IfGE(cmdl) :: clt -> Set.union (findSpeciesInStep cmdl) (findSpeciesInStep clt)
+    | IfEQ(cmdl) :: clt -> Set.union (findSpeciesInStep cmdl) (findSpeciesInStep clt)
+    | IfLE(cmdl) :: clt -> Set.union (findSpeciesInStep cmdl) (findSpeciesInStep clt)
+    | IfLT(cmdl) :: clt -> Set.union (findSpeciesInStep cmdl) (findSpeciesInStep clt)
+    | Rx(r,p,c) :: clt -> Set.union (Set.ofList r) (Set.union (Set.ofList p) (findSpeciesInStep clt)) 
 
-let interpretProgram (R(concl, stepl)) (initialState: State)=
+
+
+let findAllSpecies (stepl : Step List) = List.fold (fun st (S(cl)) -> Set.union st (findSpeciesInStep cl)) Set.empty stepl
+
+let interpretProgram (R(concl, stepl)) (initialState: State) =
+
+    let occurringSpecies = findAllSpecies stepl
+
+    let initialState = Set.fold (fun st s -> if not (Map.containsKey s st) then Map.add s 0.0 st else st) initialState occurringSpecies
 
     if not (isTyped (R(concl, stepl))) then
         failwith "Does not typecheck"
@@ -72,6 +96,8 @@ let interpretProgram (R(concl, stepl)) (initialState: State)=
                 let nextState = doStep (List.item (i % List.length stepl) stepl) state
                 Some(nextState, (nextState, i + 1)))
             (initialState, 0)
+
+
 
 
 // Code for converting a CRN program AST to a tree with nodes corresponding to the AST, for plotting.
