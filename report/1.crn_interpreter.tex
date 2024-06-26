@@ -9,28 +9,25 @@ Looking at the grammar defined by the article in their listing 1.1, there are im
 
 In the following, our changes to the grammar is listed. The complete revised grammar can be seen in appendix \ref{sec:grammar_revised}. 
 
-
-
-
-As stated in the article, the rule \texttt{ConcS} represents the starting concentration of the species. Thus a \texttt{conc['$\langle \text{A} \rangle$', '$\langle \text{64} \rangle$']} on line 32, effects the the concentration of \texttt{A} on line 16. We deemed this non-intuitive, and to force the concentrations to be stated at the top of the program. This was done by changing the \texttt{RootList}:
+In the article's grammar, it is possible to interchange \texttt{'conc'} and \texttt{'step'} rules, which means a \texttt{'conc'} rule in the bottom of a program could set the concentration of a species used in the beginning. We deemed this unintuitive and in our grammar, all \texttt{'conc'} rules must come before all \texttt{'step'} rules. This was done by changing the beginning of the program to the following:
 \begin{tabbing}
-    $\langle \text{Crn} \rangle$ \,::=\; \= \texttt{crn= \{'$\langle \text{ConcList} \rangle$' ',' $\langle \text{StepList} \rangle$}\} \\
+    $\langle \text{Crn} \rangle$ \,::=\; \= \texttt{'crn=\{'$\langle \text{ConcRootSList} \rangle$'\}'} \\
     
-    $\langle \text{ConcList} \rangle$ \,::=\;  $ \epsilon$ \\
-    
-     \>\textbar \, $\langle \text{Conc} \rangle$ ',' $\langle \text{ConcList} \rangle$ \\
+    $\langle \text{ConcRootSList} \rangle$ \,::=\;  $\langle \text{ConcS} \rangle$ ',' $\langle \text{ConcRootList} \rangle$ \\
+    \>\textbar \, $\langle \text{RootSList} \rangle$ \\
 
-      $\langle \text{StepList} \rangle$ \,::=\;  $\langle \text{Step} \rangle$ \\
-
-      \>\textbar \, $\langle \text{Step} \rangle$ ',' $\langle \text{StepList} \rangle$ \\
+    $\langle \text{RootSList} \rangle$ \,::=\;  $\langle \text{StepS} \rangle$ \\
+    \>\textbar \, $\langle \text{StepS} \rangle$ ',' $\langle \text{RootSList} \rangle$
 \end{tabbing}
-Furthermore, in \texttt{CommandS} \texttt{ArithmeticS} is mentioned but not defined. We assume that it refers to the defined but not mentioned \texttt{ModuleS}, which would make much sense now that \texttt{ModuleS} contains arithmetic expressions. Therefore, we rename \texttt{ArithmeticS} to \texttt{ModuleS}.\\
+With these rules, a program can have zero or more \texttt{'conc'} statements and at least one \texttt{'step'}. 
 
-Other than \texttt{ConcS}, there are also other restrictions, all of which we found easier to implement using syntactic restrictions. Firstly, all \texttt{number} must be non-negative, since chemical concentrations are always positive. Furthermore, to ensure fast and deterministic convergence of all ODEs, there can not be any cycles where one species depends on itself nor can a species be written to twice in one step. This implicitly disallows multiple \texttt{cmp} now that all \texttt{cmp} write to the same flags. Lastly, we enforce that all \texttt{ConditionalS} in a step must be mutually exclusive, e.g. \texttt{ifLT} cannot be used together with \texttt{ifLE} since both can be true simultaneously and that there can not be any nested \texttt{if}. This does not reduce expressiveness and makes it simpler to check the restrictions.
+In the article's grammar, \texttt{CommandS} includes \texttt{ArithmeticS} nad \texttt{CmpS} but they are not defined. We assume that they refer to the defined but not mentioned \texttt{ModuleS}, since \texttt{ModuleS} contains arithmetic expressions and includes the \texttt{'cmp'} rule. When revising the grammar, we decided to define \texttt{CommandS} as simply each of these, along with \texttt{ConditionalS} which was already a part of it. The result can be seen in appendix \ref{sec:grammar_revised}. 
 
+Other than \texttt{ConcS}, there are also other restrictions, all of which we found easier to implement using syntactic restrictions. Firstly, all numbers must be non-negative, since chemical concentrations are always positive. Furthermore, to ensure fast and deterministic convergence of all ODEs, there can not be any cycles where one species depends on itself, nor can a species be written to twice in one step. Notice that this implicitly disallows multiple \texttt{cmp} in a single step since all \texttt{cmp} write to the same flags. Lastly, we enforce that all \texttt{ConditionalS} in a step must be mutually exclusive, e.g. \texttt{ifLT} cannot be used together with \texttt{ifLE} since both can be true simultaneously. Additionally, there can not be any nested \texttt{if}. This does not reduce expressiveness of the language and makes it simpler to check the restrictions.
 
 
 \subsection{Abstract syntax tree (AST)}
+
 The AST is rooted in Root: 
 \begin{minted}{haskell}
     type Root = R of Conc List * Step List
@@ -91,8 +88,8 @@ and utilizing it in an unfold. The interoperate function then becomes:
     
             Seq.unfold
                 (fun (state, i) ->
-                    let nextState = doStep (List.item (i % List.length stepl) stepl) state
-                    Some(nextState, (nextState, i + 1)))
+                    let nextState = doStep (List.item (i % List.length stepl) stepl)
+                        state Some(nextState, (nextState, i + 1)))
                 (initialState, 0)
 \end{minted}
 
