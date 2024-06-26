@@ -10,9 +10,11 @@ def read_states_from_file(filename):
         lines = f.readlines()
         for line in lines:
             line=line.strip()
+            line = line.replace('\x00', "")
             if line == "NEXTSTEP":
                 steps.append([])
             else:
+                if len(line.split()) < 2: continue
                 spec, conc = line.split()
                 conc = float(conc)
                 steps[-1].append((spec,conc))
