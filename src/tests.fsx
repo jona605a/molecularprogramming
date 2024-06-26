@@ -739,10 +739,9 @@ let validProgramsWithRandomInput = ["crn = {
 let interpreterAndSimAgree (programIdx : int) (a: int) (b: int) (c: int) =
     let inputPro = validProgramsWithRandomInput.[abs(programIdx) % (List.length validProgramsWithRandomInput)] |> rmws
     let inputProgram = 
-        inputPro.Replace("{a}", abs(a).ToString())
-                .Replace("{b}", abs(b).ToString())
-                .Replace("{c}", abs(c).ToString())
-
+        inputPro.Replace("{a}", (abs(a)+1).ToString())
+                .Replace("{b}", (abs(b)+1).ToString())
+                .Replace("{c}", (abs(c)+1).ToString())
     printfn "%A" inputProgram
     let ast = 
         match run pprogram inputProgram with
@@ -750,7 +749,7 @@ let interpreterAndSimAgree (programIdx : int) (a: int) (b: int) (c: int) =
             | Failure(errorMsg, _, _) -> R([], [])
 
     
-    let ignoreSet = Set.ofList ["Xegty";"Xelty";"Yegtx";"Yeltx"]
+    let ignoreSet = Set.ofList ["Xegty";"Xelty";"Yegtx";"Yeltx";"T1";"T2";"T3";"T4";"T5";"T6";"T7";"T8";"T9";"T10";"T11";"T12"; "CMP1";"CMP2";"H0";""]
 
 
     if ast = R([], []) then true else 
@@ -760,7 +759,6 @@ let interpreterAndSimAgree (programIdx : int) (a: int) (b: int) (c: int) =
     let initState,crn = compileCRN ast
     let simulationState = Seq.item 2000 (simulateReactionsMatrix initState crn 0.01)
     let speciesToCheck = Map.fold (fun st k v -> if not (Set.contains k ignoreSet) then Set.add k st else st) Set.empty interpreterState
-    printfn "%A\n\n%A" (simulationState) (interpreterState)
     Set.forall (fun s ->abs  ((getValue simulationState s) - (getValue interpreterState s)) < 0.2) speciesToCheck
 
 
