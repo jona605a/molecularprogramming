@@ -14,7 +14,6 @@ let getValue map s =
 
 let calcNetChange (Rxn(r, p, c)) (s: species) = (getValue p s) - (getValue r s) 
 
-// -------------- Matrix functions --------------
 
 let reactionToList (Rxn(r,_,_)) (sl : species List) = (List.foldBack (fun s st -> (getValue r s) :: st) sl [])
 
@@ -35,7 +34,7 @@ let simulateStepMatrix (state : State) (crn : CRN) (netChangeMatrix : Matrix<flo
     let change = calcDerivatives netChangeMatrix (calcReactionProducts state crn) timestep
     Map.add "Ø" 0.0 (List.fold (fun map (s,ds) -> Map.add s ((getValue state s) + ds) map) state (List.zip sl (List.ofArray (Vector.toArray change))))
 
-let simulateReationsMatrix (state : State) (crn : CRN) (timestep : float) = 
+let simulateReactionsMatrix (state : State) (crn : CRN) (timestep : float) = 
     let sl = Set.toList (Set.ofList (
             List.fold
                 (fun sp (Rxn(r, p, _)) ->
@@ -50,46 +49,3 @@ let simulateReationsMatrix (state : State) (crn : CRN) (timestep : float) =
     Seq.unfold (fun st -> let nextState = simulateStepMatrix st crn netChangeMatrix sl timestep
                           Some(nextState,nextState)) state
 
-
-
-// -----------------------------------------------
-
-
-let calcReactionEffect (state: State) (Rxn(r, p, c)) (s: species) =
-
-    c
-    * (calcNetChange ((Rxn(r, p, c))) s)
-    * (Map.fold (fun st reac mult -> st * (getValue state reac) ** mult) 1.0 r)
-
-
-let calcSpeciesChange (state: State) (crn: CRN) (s: species) =
-    List.fold (fun chg rxn -> chg + (calcReactionEffect state rxn s)) 0.0 crn
-
-
-let simulationStep (state: State) (crn: CRN) (timestep: float) occurringSpecies =
-    Map.add
-        "Ø"
-        0.0
-        (Set.fold
-            (fun st s -> Map.add s (max 0.00001 ((getValue state s) + ((calcSpeciesChange state crn s) * timestep))) st)
-            state
-            occurringSpecies)
-
-
-let simulateReactions (state: State) (crn: CRN) (timestep: float) =
-    let occurringSpecies =
-        Set.ofList (
-            List.fold
-                (fun sp (Rxn(r, p, _)) ->
-                    Map.fold (fun keys k _ -> k :: keys) [] r
-                    @ Map.fold (fun keys k _ -> k :: keys) [] p
-                    @ sp)
-                []
-                crn
-        )
-
-    Seq.unfold
-        (fun (st, network, time) ->
-            let nextstate = simulationStep st network time occurringSpecies
-            Some((nextstate, (nextstate, network, time))))
-        (state, crn, timestep)

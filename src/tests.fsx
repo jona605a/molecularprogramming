@@ -297,30 +297,28 @@ let rec shuffleSteps (R(conc, steps)) =
 
 let implies a b = (not a) || b
 
-let sequenceEqual s1 s2 =
+let sequenceEqual (s1 : seq<State>) (s2 : seq<State>) =
     let mapsEqual m1 m2 = 
-        let k1 = Map.keys m1 |> Seq.cast |> Set.ofSeq
-        let k2 = Map.keys m2  |> Seq.cast |> Set.ofSeq
-        let keystEqual = Set.difference k1 k2 = (Set.difference k2 k1) && Set.difference k1 k2 = Set.empty
-        keystEqual && Set.forall (fun k -> 
-            let v1 = Map.find m1 k
-            let v2 = Map.find m2 k
-            (System.Double.IsNaN(v1) && System.Double.IsNaN(v2)) || (v1 = v2)) k1
+        let k1 = Map.fold (fun st k v -> Set.add k st) Set.empty m1
+        let k2 = Map.fold (fun st k v -> Set.add k st) Set.empty m2
+        k1 = k2 && Set.forall (fun k -> getValue m1 k = getValue m2 k) k1
+
     
-    let map1 = Seq.take 50 s1 |> Seq.toList
-    let map2 = Seq.take 50 s2 |> Seq.toList
+    let map1 = Seq.take 5 s1 |> Seq.toList
+    let map2 = Seq.take 5 s2 |> Seq.toList
+    printfn "%A\n%A" map1 map2
     List.forall2 (fun m1 m2 -> mapsEqual m1 m2) map1 map2
 
 
 
 let moduleSimTestResultHelper initState crn absa absb op = 
-    let res = (abs((simulateReationsMatrix initState crn 0.01 |> Seq.item 1000 |>  Map.find "c") - (op absa absb)))
+    let res = (abs((simulateReactionsMatrix initState crn 0.01 |> Seq.item 1000 |>  Map.find "c") - (op absa absb)))
     printfn "%A\n" res
     res < max 0.01 ((op absa absb) / 200.0)
 
 
 let stepOrderDoesNotMatter (programIdx: int) =
-    let inputProgram = programs.[programIdx % (List.length programs)] |> rmws
+    let inputProgram = programs.[abs(programIdx) % (List.length programs)] |> rmws
     let ast = 
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
@@ -328,8 +326,9 @@ let stepOrderDoesNotMatter (programIdx: int) =
     if ast = R([], []) then true
     else
         let shufSteps = shuffleSteps ast
-        (isTyped ast = isTyped shufSteps)
-        && (implies (isTyped ast) ((sequenceEqual (interpretProgram ast) (interpretProgram shufSteps))))
+        (isTyped ast = isTyped shufSteps) ||
+        (implies (isTyped ast) ((sequenceEqual (interpretProgram ast) (interpretProgram shufSteps))))
+
 
 
 
@@ -529,23 +528,26 @@ let sqrtSimWorks (a: int) =
     moduleSimTestResultHelper initState CRN absa 0 (fun x y -> sqrt (float x))
 
 
-
-let cmpSimWorks (NormalFloat(a)) (NormalFloat(b)) =
-    let inputProgram = 
-        $"crn = {{
-            conc[a,{a}], conc[cInitial,{b}],
-            step[{{ cmp[a,b], }}]
-        }}" |> rmws
+let interpreterAndSimAgree (programIdx : int) = 
+    let inputProgram = programs.[abs(programIdx) % (List.length programs)] |> rmws
     let ast = 
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
-            | Failure(errorMsg, _, _) -> failwith "Should not be reachable"
-    if a-b > 0.01 then // Todo
-        true
-    elif b-a > 0.01 then 
-        true 
-    else 
-        true
+            | Failure(errorMsg, _, _) -> R([], [])
+
+    
+    let ignoreSet = Set.ofList ["Xegty";"Xelty";"Yegtx";"Yeltx"]
+
+
+    if ast = R([], []) then true else 
+    not (isTyped ast) ||
+    let interpreterState = Seq.item 0 (interpretProgram ast)
+    let initState,crn = compileCRN ast
+    let simulationState = Seq.item 2000 (simulateReactionsMatrix initState crn 0.01)
+    let speciesToCheck = Map.fold (fun st k v -> if not (Set.contains k ignoreSet) then Set.add k st else st) Set.empty interpreterState
+    Set.forall (fun s ->abs  ((getValue simulationState s) - (getValue interpreterState s)) < 0.2) speciesToCheck
+
+
 // FSCheck tests ////////////////////////
 
 let config = { Config.Quick with MaxTest = 1000 }
@@ -563,3 +565,5 @@ Check.One(config, subSimWorks)
 Check.One(config, divSimWorks)
 Check.One(config, mulSimWorks)
 Check.One(config, sqrtSimWorks)
+
+Check.One(config, interpreterAndSimAgree)

@@ -53,10 +53,10 @@ let main args =
 
         let initState, reactions = compileCRN ast
         
-        let simulation = simulateReationsMatrix initState reactions 0.01
+        let simulation = simulateReactionsMatrix initState reactions 0.01
 
         printStateRange simulation 0 40000 []
-                
+
     else if args.Length = 2 then
         let inputProgram = readFile args[0] |> rmws
         let ast =
