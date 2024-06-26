@@ -609,7 +609,7 @@ let cmpSimWorks (a: int) (b: int) =
 
 
 let validProgramsWithRandomInput = ["crn = {
-    conc[{c},3], conc[cInitial, 3],
+    conc[c,{c}], conc[cInitial, 3],
     conc[one,1], conc[zero,0],
     step[{
         sub[c,one,cnext],
@@ -621,7 +621,7 @@ let validProgramsWithRandomInput = ["crn = {
     }]
 }"; 
 "crn={
-    conc[{a},20], conc[{b},3], conc[one,1],
+    conc[a,{a}], conc[b,{b}], conc[one,1],
     step[{
         cmp[a,b]
     }],
@@ -671,8 +671,8 @@ let validProgramsWithRandomInput = ["crn = {
     }]
 }";
 "crn = {
-    conc[{a},32],
-    conc[{b},12],
+    conc[a,{a}],
+    conc[b,{b}],
     step[{
         ld[a,atmp],
         ld[b,btmp],
@@ -715,7 +715,7 @@ let validProgramsWithRandomInput = ["crn = {
 }
 ";
 "crn={
-    conc[{a},20],conc[{b},13],
+    conc[a,{a}],conc[b,{b}],
     conc[one,1],conc[zero,0],
     step[{
         cmp[b,zero]
@@ -742,6 +742,8 @@ let interpreterAndSimAgree (programIdx : int) (a: int) (b: int) (c: int) =
         inputPro.Replace("{a}", abs(a).ToString())
                 .Replace("{b}", abs(b).ToString())
                 .Replace("{c}", abs(c).ToString())
+
+    printfn "%A" inputProgram
     let ast = 
         match run pprogram inputProgram with
             | Success((res: CRNpp.Root), _, _) -> res
