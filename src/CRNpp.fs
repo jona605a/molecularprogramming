@@ -1,3 +1,4 @@
+// Hans Henrik Hermansen 26/06 // Jonathan Højlev 26/06
 module CRNpp
 
 type species = string
