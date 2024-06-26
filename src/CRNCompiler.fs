@@ -204,7 +204,7 @@ let compileCRN (R(conclist, steplist)) =
         List.fold
             (fun st key -> Map.add key 0.5 st)
             initState
-            [ "eps"; "Xgty"; "Xlty"; "Xegty"; "Xelty"; "Yegtx"; "Yeltx" ]
+            [ "eps"; "Xegty"; "Xelty"; "Yegtx"; "Yeltx" ]
 
     let temp = List.init (numOfSteps * 3) (fun x -> x + 1)
 
